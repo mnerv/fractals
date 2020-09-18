@@ -1,0 +1,26 @@
+# Binaries
+**/bin
+**/obj
+
+# Generated Files
+mandelbrot.ppm
+
+# Generated Workspaces
+
+# Xcode
+*.xcworkspace
+*.xcodeproj
+
+# Visual Studio
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.vs
+
+# Makefile
+Makefile
+*.make
+
+# Visual Studio Code
+.vscode
