@@ -23,9 +23,16 @@ project "Mandelbrot"
 
   files {
     "%{prj.name}/src/**.h",
-    "%{prj.name}/src/**.cpp"
+    "%{prj.name}/src/**.cpp",
+    "%{prj.name}/vendor/**.h",
+    "%{prj.name}/vendor/**.cpp"
   }
 
+  includedirs {
+    "%{prj.name}/src",
+    "%{prj.name}/vendor",
+  }
+  
   filter "system:macosx"
     systemversion "latest"
     system "macosx"
