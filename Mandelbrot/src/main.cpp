@@ -1,18 +1,19 @@
 #include <iostream>
-#include <string>
-#include <fstream>
 #include <cmath>
 #include <chrono>
+#include <vector>
+#include <string.h>
 
 #include "stb/stb_image_write.h"
 
 constexpr float default_scale = 1.5f;
+constexpr float default_radius = 2.f;
 
 int mandelbrot(const float& x, const float& y, const int& max_iteration,
                const float& scale_x = default_scale,
                const float& scale_y = default_scale,
                const float& offset_x = 0.f, const float& offset_y = 0.f,
-               const float& radius = 2.f) {
+               const float& radius = default_radius) {
     float r2 = radius * radius;
 
     float z_real = 0;
@@ -44,14 +45,47 @@ float map(float x, float in_min, float in_max, float out_min, float out_max) {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
+void print_console(const int& max_iter) {
+    float step = 0.04;
+    for (float i = -1; i <= 1; i += step) {
+        for (float j = -3.5; j <= 1; j += step) {
+            if (mandelbrot(j, i, max_iter, 0.6f, 1.1f) >= max_iter - 200) {
+                std::cout << "*";
+            } else {
+                std::cout << " ";
+            }
+        }
+
+        std::cout << std::endl;
+    }
+}
+
 int main(int argc, char const* argv[]) {
-    const int width = 4096, height = 4096, channels = 4;
+    const int width = 8192, height = 8192, channels = 4;
     const int max_iter = 256;
 
-    uint8_t* pixels = new uint8_t[width * height * channels];
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed;
+    auto start = std::chrono::high_resolution_clock::now();
+
+    if (argc > 1 && strcmp(argv[1], "-c") == 0) {
+        std::cout << "Generating Mandelbrot set..." << std::endl;
+        print_console(max_iter);
+        end = std::chrono::high_resolution_clock::now();
+        elapsed = end - start;
+        std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+
+        return 0;
+    }
+
+    std::cout << "Allocating memory..." << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+    std::vector<uint8_t> pixels(width * height * channels);
+    elapsed = std::chrono::high_resolution_clock::now() - start;
+    std::cout << "Time took allocating memory: " << elapsed.count() << " s\n";
 
     std::cout << "Generating Mandelbrot set..." << std::endl;
-    auto start = std::chrono::high_resolution_clock::now();
+    start = std::chrono::high_resolution_clock::now();
 
     int index = 0;
     for (int i = 1; i < height + 1; i++) {
@@ -76,20 +110,19 @@ int main(int argc, char const* argv[]) {
         }
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed = end - start;
+    end = std::chrono::high_resolution_clock::now();
+    elapsed = end - start;
     std::cout << "Elapsed time: " << elapsed.count() << " s\n";
 
     start = std::chrono::high_resolution_clock::now();
 
-    stbi_write_png("mandelbrot.png", width, height, channels, pixels,
-                   width * channels);
+    std::cout << "Writing to disk..." << std::endl;
+    stbi_write_png("mandelbrot.png", width, height, channels, &pixels[0],
+                   width * channels); // &pixels[0] kind of hacky
 
     end = std::chrono::high_resolution_clock::now();
     elapsed = end - start;
-    std::cout << "Writing took: " << elapsed.count() << " s\n";
-
-    delete[] pixels;
+    std::cout << "Time took to write: " << elapsed.count() << " s\n";
 
     return 0;
 }
