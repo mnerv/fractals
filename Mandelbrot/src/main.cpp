@@ -69,7 +69,7 @@ void print_console(const int& max_iter) {
 }
 
 int main(int argc, char const* argv[]) {
-    const int width = 512, height = 512, channels = 4;
+    const int width = 1048, height = 1048, channels = 4;
     const int max_iter = 512;
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -104,7 +104,7 @@ int main(int argc, char const* argv[]) {
             int n = mandelbrot(map_x, map_y, max_iter);
 
             if (n < max_iter) {
-                int c = map(n, 0, 50, 0, 255);
+                int c = map(n, 0, 128, 0, 255);
                 int ca = clamp(c, 0, 255);
 
                 pixels[index++] = ca;

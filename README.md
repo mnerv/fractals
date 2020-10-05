@@ -2,6 +2,10 @@
 
 Basic image generation using [stb](https://github.com/nothings/stb) image loader/writer.
 
+## Sample image
+
+![Mandelbrot set in grey scale](https://imgur.com/V69w0M5.png)
+
 ## Requirements
 
   - [premake5](https://github.com/premake/premake-core)
