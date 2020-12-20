@@ -6,8 +6,8 @@
 
 #include "stb/stb_image_write.h"
 
-constexpr int default_width = 1048;
-constexpr int default_height = 1048;
+constexpr int default_width = 4096;
+constexpr int default_height = 4096;
 
 constexpr float default_scale = 1.5f;
 constexpr float default_radius = 2.f;
@@ -93,9 +93,10 @@ int main(int argc, char const* argv[]) {
         return 0;
     }
 
-    std::cout << "Allocating memory..." << std::endl;
+    std::cout << "Allocating " << width * height * channels * sizeof(uint8_t)
+              << " bytes in memory..." << std::endl;
     start = std::chrono::high_resolution_clock::now();
-    std::vector<uint8_t> pixels(width * height * channels);
+    uint8_t* pixels = new uint8_t[width * height * channels];
     elapsed = std::chrono::high_resolution_clock::now() - start;
     std::cout << "Time took allocating memory: " << elapsed.count() << "s\n";
 
@@ -134,12 +135,15 @@ int main(int argc, char const* argv[]) {
     start = std::chrono::high_resolution_clock::now();
 
     std::cout << "Writing to disk..." << std::endl;
-    stbi_write_png("mandelbrot.png", width, height, channels, &pixels[0],
-                   width * channels); // &pixels[0] kind of hacky
+    stbi_write_png("mandelbrot.png", width, height, channels, pixels,
+                   width * channels);
 
     end = std::chrono::high_resolution_clock::now();
     elapsed = end - start;
     std::cout << "Time took to write: " << elapsed.count() << " s\n";
+
+    std::cout << "Freeing memory...\n";
+    free(pixels);
 
     return 0;
 }
