@@ -6,13 +6,20 @@
 
 #include "stb/stb_image_write.h"
 
+constexpr int default_width = 1048;
+constexpr int default_height = 1048;
+
 constexpr float default_scale = 1.5f;
 constexpr float default_radius = 2.f;
+constexpr float default_offset_x = -0.25f;
+constexpr float default_offset_y = 0.f;
+constexpr int default_max_iterations = 512;
 
 int mandelbrot(const float& x, const float& y, const int& max_iteration,
                const float& scale_x = default_scale,
                const float& scale_y = default_scale,
-               const float& offset_x = -.25f, const float& offset_y = 0.f,
+               const float& offset_x = default_offset_x,
+               const float& offset_y = default_offset_y,
                const float& radius = default_radius) {
     float r2 = radius * radius;
 
@@ -69,8 +76,8 @@ void print_console(const int& max_iter) {
 }
 
 int main(int argc, char const* argv[]) {
-    const int width = 1048, height = 1048, channels = 4;
-    const int max_iter = 512;
+    const int width = default_width, height = default_height, channels = 4;
+    const int max_iter = default_max_iterations;
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed;
