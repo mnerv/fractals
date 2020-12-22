@@ -1,8 +1,10 @@
+#define _USE_MATH_DEFINES
+
 #include <iostream>
-#include <cmath>
 #include <chrono>
 #include <vector>
 #include <string.h>
+#include <cmath>
 
 #include "stb/stb_image_write.h"
 
@@ -94,37 +96,31 @@ int main(int argc, char const* argv[]) {
     }
 
     std::cout << "Allocating " << width * height * channels * sizeof(uint8_t)
-              << " bytes in memory..." << std::endl;
+              << " bytes of memory for image..." << std::endl;
     start = std::chrono::high_resolution_clock::now();
     uint8_t* pixels = new uint8_t[width * height * channels];
     elapsed = std::chrono::high_resolution_clock::now() - start;
-    std::cout << "Time took allocating memory: " << elapsed.count() << "s\n";
+    std::cout << "Time took allocating memory for image: " << elapsed.count()
+              << "s\n";
+
+    std::cout << "Allocating " << width * height * sizeof(int32_t)
+              << " bytes of memory for Mandelbrot...\n";
+    start = std::chrono::high_resolution_clock::now();
+    int32_t* fractals = new int32_t[width * height];
+    elapsed = std::chrono::high_resolution_clock::now() - start;
+    std::cout << "Time took: " << elapsed.count() << "s\n";
 
     std::cout << "Generating Mandelbrot set..." << std::endl;
     start = std::chrono::high_resolution_clock::now();
 
-    int index = 0;
-    for (int i = 1; i < height + 1; i++) {
-        float map_y = map<float>((float)i, 1.0, (float)height, 1.0, -1.0);
+    for (int i = 0; i < height; i++) {
+        float map_y = map<float>((float)(i + 1), 1.0, (float)height, 1.0, -1.0);
 
-        for (int j = 1; j < width + 1; j++) {
-            float map_x = map<float>((float)j, 1.0f, (float)width, -1.0f, 1.0f);
-            int n = mandelbrot(map_x, map_y, max_iter);
+        for (int j = 0; j < width; j++) {
+            float map_x =
+                map<float>((float)(j + 1), 1.0f, (float)width, -1.0f, 1.0f);
 
-            if (n < max_iter) {
-                int c = map(n, 0, 128, 0, 255);
-                int ca = clamp(c, 0, 255);
-
-                pixels[index++] = ca;
-                pixels[index++] = ca;
-                pixels[index++] = ca;
-                pixels[index++] = 255;
-            } else {
-                pixels[index++] = 0;
-                pixels[index++] = 0;
-                pixels[index++] = 0;
-                pixels[index++] = 255;
-            }
+            fractals[i * width + j] = mandelbrot(map_x, map_y, max_iter);
         }
     }
 
@@ -132,8 +128,42 @@ int main(int argc, char const* argv[]) {
     elapsed = end - start;
     std::cout << "Elapsed time: " << elapsed.count() << " s\n";
 
+    std::cout << "Generating image...\n";
     start = std::chrono::high_resolution_clock::now();
 
+    int index = 0;
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            int32_t n = fractals[i * width + j];
+
+            if (n < max_iter) {
+                float c = map<float>(n, 0, max_iter, 0, 1);
+                c = clamp<float>(c, 0, 1);
+
+                int r = (int)((sin(.3f * 12.f * c - M_PI / 2.f) + 1.f) * 0.5 *
+                              255.f);
+                int g = (int)((sin(.1f * 12.f * c - M_PI / 2.f) + 1.f) * 0.5 *
+                              255.f);
+                int b = (int)((sin(.5f * 12.f * c - M_PI / 2.f) + 1.f) * 0.5 *
+                              255.f);
+
+                pixels[index++] = r;
+                pixels[index++] = g;
+                pixels[index++] = b;
+                pixels[index++] = 255;
+            } else {
+                pixels[index++] = 5;
+                pixels[index++] = 5;
+                pixels[index++] = 5;
+                pixels[index++] = 255;
+            }
+        }
+    }
+
+    elapsed = std::chrono::high_resolution_clock::now() - start;
+    std::cout << "Time took generating image: " << elapsed.count() << "s\n";
+
+    start = std::chrono::high_resolution_clock::now();
     std::cout << "Writing to disk..." << std::endl;
     stbi_write_png("mandelbrot.png", width, height, channels, pixels,
                    width * channels);
@@ -144,6 +174,7 @@ int main(int argc, char const* argv[]) {
 
     std::cout << "Freeing memory...\n";
     free(pixels);
+    free(fractals);
 
     return 0;
 }
