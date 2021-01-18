@@ -4,7 +4,7 @@ Basic image generation using [stb](https://github.com/nothings/stb) image loader
 
 ## Sample image
 
-![Mandelbrot set in grey scale](https://imgur.com/V69w0M5.png)
+![Mandelbrot set in color](/res/mandelbrot_set.png)
 
 ## Requirements
 
