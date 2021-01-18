@@ -9,9 +9,9 @@
 
 #include "stb/stb_image_write.h"
 
-constexpr int WIDTH = 8192;
-constexpr int HEIGHT = 8192;
-constexpr int MAX_ITERATIONS = 1024;
+constexpr int WIDTH = 2048;
+constexpr int HEIGHT = 2048;
+constexpr int MAX_ITERATIONS = 256;
 
 template <typename T, typename = typename std::enable_if<
                           std::is_floating_point<T>::value, T>::type>
@@ -90,7 +90,7 @@ int main(int argc, char const* argv[]) {
             for (int j = 0; j < WIDTH; j++) {
                 double x = map<double>(j + 1, 1.0, HEIGHT, -1.0, 1.0);
                 fractals[i * WIDTH + j] =
-                    mandelbrot<double>(x, y, max_iterations, 1.2);
+                    mandelbrot<double>(x, y, max_iterations, 1.1);
             }
         }
     };
