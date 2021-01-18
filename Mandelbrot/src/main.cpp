@@ -1,4 +1,4 @@
-#define _USE_MATH_DEFINES
+﻿#define _USE_MATH_DEFINES
 
 #include <iostream>
 #include <chrono>
@@ -23,7 +23,7 @@ int mandelbrot(T x, T y, int max, T scale = 1.0, T offset_x = 0.0,
     T zr_tmp = 0;
     T zi = 0;
 
-    scale = std::pow<T>(2.0, scale);
+    scale = std::pow(2.0, scale);
     T cr = x * scale + offset_x;
     T ci = y * scale + offset_y;
 
@@ -150,12 +150,12 @@ int main(int argc, char const* argv[]) {
     elapsed = std::chrono::high_resolution_clock::now() - start;
     std::cout << "Time took: " << elapsed.count() << "s\n\n";
 
-    // std::cout << "Writing image to disc...\n";
-    // start = std::chrono::high_resolution_clock::now();
-    // stbi_write_png("mandelbrot.png", WIDTH, HEIGHT, CHANNELS, pixels,
-    //                WIDTH * CHANNELS);
-    // elapsed = std::chrono::high_resolution_clock::now() - start;
-    // std::cout << "Time took: " << elapsed.count() << "s\n\n";
+    std::cout << "Writing image to disk...\n";
+    start = std::chrono::high_resolution_clock::now();
+    stbi_write_png("mandelbrot.png", WIDTH, HEIGHT, CHANNELS, pixels,
+                   WIDTH * CHANNELS);
+    elapsed = std::chrono::high_resolution_clock::now() - start;
+    std::cout << "Time took: " << elapsed.count() << "s\n\n";
 
     std::cout << "Clean up...\n";
     delete[] pixels;
