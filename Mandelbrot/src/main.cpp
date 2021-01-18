@@ -125,14 +125,14 @@ int main(int argc, char const* argv[]) {
             int32_t n = fractals[i * WIDTH + j];
 
             if (n < max_iterations) {
-                float c = std::sqrtf((float)n / (float)max_iterations);
+                float c = std::sqrt((float)n / (float)max_iterations);
                 // c = clamp<float>(c, 0, 1);
 
-                int r = (int)((sin(.3f * 12.f * c - M_PI / 2.f) + 1.f) * 0.5 *
+                int r = (int)((sin(.3f * 12.f * c - M_PI / 2.f) + 1.f) * 0.5f *
                               255.f);
-                int g = (int)((sin(.1f * 12.f * c - M_PI / 2.f) + 1.f) * 0.5 *
+                int g = (int)((sin(.1f * 12.f * c - M_PI / 2.f) + 1.f) * 0.5f *
                               255.f);
-                int b = (int)((sin(.5f * 12.f * c - M_PI / 2.f) + 1.f) * 0.5 *
+                int b = (int)((sin(.5f * 12.f * c - M_PI / 2.f) + 1.f) * 0.5f *
                               255.f);
 
                 pixels[index++] = r;
