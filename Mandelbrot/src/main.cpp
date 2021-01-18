@@ -9,9 +9,9 @@
 
 #include "stb/stb_image_write.h"
 
-constexpr int WIDTH = 2048;
-constexpr int HEIGHT = 2048;
-constexpr int MAX_ITERATIONS = 256;
+constexpr int WIDTH = 2024;
+constexpr int HEIGHT = 2024;
+constexpr int MAX_ITERATIONS = 512;
 
 template <typename T, typename = typename std::enable_if<
                           std::is_floating_point<T>::value, T>::type>
@@ -93,6 +93,9 @@ int main(int argc, char const* argv[]) {
                     mandelbrot<double>(x, y, max_iterations, 1.1);
             }
         }
+
+        std::cout << "Thread ID: " << std::this_thread::get_id()
+                  << " is done\n";
     };
 
     const uint32_t n_threads = std::thread::hardware_concurrency();
