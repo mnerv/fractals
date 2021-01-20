@@ -11,8 +11,8 @@
 
 #include "stb/stb_image_write.h"
 
-constexpr int WIDTH = 8192;
-constexpr int HEIGHT = 8192;
+constexpr int WIDTH = 2048;
+constexpr int HEIGHT = 2048;
 constexpr int MAX_ITERATIONS = 256;
 
 template <typename T, typename = typename std::enable_if<
@@ -86,9 +86,15 @@ int main(int argc, char const* argv[]) {
     elapsed = std::chrono::high_resolution_clock::now() - start;
     std::cout << "Time took: " << elapsed.count() << "s\n\n";
 
+    const uint32_t n_threads = std::thread::hardware_concurrency();
+    std::cout << "Hardware thread count: " << n_threads << "\n";
+    const int thread_count = n_threads;
+    std::cout << "Thread count: " << thread_count << "\n";
+    std::thread* t = new std::thread[thread_count];
     std::mutex cout_lock;
 
-    auto do_work = [&](int row_start, int row_end, int col_start, int col_end) {
+    auto compute_fractal = [&](int row_start, int row_end, int col_start,
+                               int col_end) {
         for (int i = row_start; i < row_end; i++) {
             double y = map<double>(i + 1, 1.0, HEIGHT, 1.0, -1.0);
             for (int j = col_start; j < col_end; j++) {
@@ -104,35 +110,56 @@ int main(int argc, char const* argv[]) {
         cout_lock.unlock();
     };
 
-    const uint32_t n_threads = std::thread::hardware_concurrency();
-    std::cout << "Hardware thread count: " << n_threads << "\n";
-    const int thread_count = 8;  // 32;
-    std::cout << "Thread count: " << thread_count << "\n";
-    std::thread* t = new std::thread[thread_count];
+    auto grid_split = [&](std::thread threads[], const int& thread_count,
+                          const int& width, const int& height) {
+        double intpart = 0;
+        const double fractpart =
+            std::modf(std::sqrt((double)thread_count), &intpart);
 
-    double intpart = 0;
-    double fractpart = std::modf(std::sqrt((double)thread_count), &intpart);
+        const int row_count = (int)intpart;
+        const int col_count =
+            fractpart > 0.0 ? thread_count / row_count : row_count;
 
-    int row_count = (int)intpart;
-    int col_count = fractpart > 0.0 ? col_count = thread_count / row_count
-                                    : col_count = row_count;
+        const int row_offset = height / row_count;
+        const int col_offset = width / col_count;
 
-    const int row_offset = HEIGHT / row_count;
-    const int col_offset = WIDTH / col_count;
+        for (int i = 0; i < row_count; i++) {
+            int row_start = row_offset * i;
+            int row_end = row_offset * (1 + i);
+            for (int j = 0; j < col_count; j++) {
+                int col_start = col_offset * j;
+                int col_end = col_offset * (j + 1);
+
+                threads[i * col_count + j] = std::thread(
+                    compute_fractal, row_start, row_end, col_start, col_end);
+            }
+        }
+    };
+
+    auto row_split = [&](std::thread threads[], const int& thread_count,
+                         const int& width, const int& height) {
+        const int row_offset = height / thread_count;
+        for (int i = 0; i < thread_count; i++) {
+            threads[i] = std::thread(compute_fractal, row_offset * i,
+                                     row_offset * (i + 1), 0, width);
+        }
+    };
+
+    auto col_split = [&](std::thread threads[], const int& thread_count,
+                         const int& width, const int& height) {
+        const int offset = width / thread_count;
+        for (int i = 0; i < thread_count; i++) {
+            threads[i] = std::thread(compute_fractal, 0, height, offset * i,
+                                     offset * (i + 1));
+        }
+    };
 
     std::cout << "Generating fractals...\n";
     start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < row_count; i++) {
-        int row_start = row_offset * i;
-        int row_end = row_offset * (1 + i);
-        for (int j = 0; j < col_count; j++) {
-            int col_start = col_offset * j;
-            int col_end = col_offset * (j + 1);
 
-            t[i * col_count + j] =
-                std::thread(do_work, row_start, row_end, col_start, col_end);
-        }
-    }
+    grid_split(t, thread_count, WIDTH, HEIGHT);
+    // row_split(t, thread_count, WIDTH, HEIGHT);
+    // col_split(t, thread_count, WIDTH, HEIGHT);
 
     for (int i = 0; i < thread_count; i++) { t[i].join(); }
 
