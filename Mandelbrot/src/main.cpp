@@ -5,13 +5,15 @@
 #include <vector>
 #include <string.h>
 #include <cmath>
+
 #include <thread>
+#include <mutex>
 
 #include "stb/stb_image_write.h"
 
-constexpr int WIDTH = 2024;
-constexpr int HEIGHT = 2024;
-constexpr int MAX_ITERATIONS = 512;
+constexpr int WIDTH = 8192;
+constexpr int HEIGHT = 8192;
+constexpr int MAX_ITERATIONS = 256;
 
 template <typename T, typename = typename std::enable_if<
                           std::is_floating_point<T>::value, T>::type>
@@ -84,33 +86,52 @@ int main(int argc, char const* argv[]) {
     elapsed = std::chrono::high_resolution_clock::now() - start;
     std::cout << "Time took: " << elapsed.count() << "s\n\n";
 
-    auto do_work = [&](int row_start, int row_end) {
+    std::mutex cout_lock;
+
+    auto do_work = [&](int row_start, int row_end, int col_start, int col_end) {
         for (int i = row_start; i < row_end; i++) {
             double y = map<double>(i + 1, 1.0, HEIGHT, 1.0, -1.0);
-            for (int j = 0; j < WIDTH; j++) {
+            for (int j = col_start; j < col_end; j++) {
                 double x = map<double>(j + 1, 1.0, HEIGHT, -1.0, 1.0);
                 fractals[i * WIDTH + j] =
                     mandelbrot<double>(x, y, max_iterations, 1.1);
             }
         }
 
+        cout_lock.lock();
         std::cout << "Thread ID: " << std::this_thread::get_id()
                   << " is done\n";
+        cout_lock.unlock();
     };
 
     const uint32_t n_threads = std::thread::hardware_concurrency();
     std::cout << "Hardware thread count: " << n_threads << "\n";
-    const int thread_count = n_threads;  // 32;
+    const int thread_count = 8;  // 32;
     std::cout << "Thread count: " << thread_count << "\n";
     std::thread* t = new std::thread[thread_count];
 
-    const int row_offset = HEIGHT / thread_count;
+    double intpart = 0;
+    double fractpart = std::modf(std::sqrt((double)thread_count), &intpart);
+
+    int row_count = (int)intpart;
+    int col_count = fractpart > 0.0 ? col_count = thread_count / row_count
+                                    : col_count = row_count;
+
+    const int row_offset = HEIGHT / row_count;
+    const int col_offset = WIDTH / col_count;
 
     std::cout << "Generating fractals...\n";
     start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < row_count; i++) {
+        int row_start = row_offset * i;
+        int row_end = row_offset * (1 + i);
+        for (int j = 0; j < col_count; j++) {
+            int col_start = col_offset * j;
+            int col_end = col_offset * (j + 1);
 
-    for (int i = 0; i < thread_count; i++) {
-        t[i] = std::thread(do_work, row_offset * i, row_offset * (i + 1));
+            t[i * col_count + j] =
+                std::thread(do_work, row_start, row_end, col_start, col_end);
+        }
     }
 
     for (int i = 0; i < thread_count; i++) { t[i].join(); }
