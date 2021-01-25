@@ -18,6 +18,9 @@ jobs:
         uses: abel0b/setup-premake@v1
       - name: Create project files
         run: premake5 gmake2
+      
+      - name: Install dependencies for OpenGL
+        run: sudo apt-get update && sudo apt-get install libglu1-mesa-dev freeglut3-dev mesa-common-dev
 
       # Build test to build the project
       - name: build debug
