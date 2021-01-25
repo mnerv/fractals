@@ -1,0 +1,26 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      # Install premake on the system
+      - name: Setup premake
+        uses: abel0b/setup-premake@v1
+      - name: Create project files
+        run: premake5 gmake2
+
+      # Build test to build the project
+      - name: build debug
+        run: make config=debug
+      - name: build release
+        run: make config=release
