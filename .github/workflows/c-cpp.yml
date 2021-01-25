@@ -14,16 +14,17 @@ jobs:
       - uses: actions/checkout@v2
       
       # Install premake on the system
-      - name: Setup premake
+      - name: Setup premake 🔧
         uses: abel0b/setup-premake@v1
-      - name: Create project files
+      - name: Create project files 🚦
         run: premake5 gmake2
       
-      - name: Install dependencies for OpenGL
-        run: sudo apt-get update && sudo apt-get install libglu1-mesa-dev freeglut3-dev mesa-common-dev
+      # Install Dependencies for OpenGL
+      - name: Install dependencies for OpenGL ⌛
+        run: sudo apt update && sudo apt install libglu1-mesa-dev freeglut3-dev mesa-common-dev
 
       # Build test to build the project
-      - name: build debug
+      - name: Build debug 🚀
         run: make config=debug
-      - name: build release
+      - name: Build release ☄️
         run: make config=release
