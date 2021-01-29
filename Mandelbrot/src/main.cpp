@@ -98,7 +98,7 @@ int main(int argc, char const* argv[]) {
         for (int i = row_start; i < row_end; i++) {
             double y = map<double>(i + 1, 1.0, HEIGHT, 1.0, -1.0);
             for (int j = col_start; j < col_end; j++) {
-                double x = map<double>(j + 1, 1.0, HEIGHT, -1.0, 1.0);
+                double x = map<double>(j + 1, 1.0, WIDTH, -1.0, 1.0);
                 fractals[i * WIDTH + j] =
                     mandelbrot<double>(x, y, max_iterations, 1.1);
             }
@@ -211,6 +211,7 @@ int main(int argc, char const* argv[]) {
     std::cout << "Clean up...\n";
     delete[] pixels;
     delete[] fractals;
+    delete[] t;
 
     std::cout << "Press enter to exit...";
     std::cin.get();
