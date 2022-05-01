@@ -1,26 +1,32 @@
-# Mandelbrot Set in C++
+# Fractals
 
-Basic image generation using [stb](https://github.com/nothings/stb) image loader/writer.
-
-## Sample image
-
-![Mandelbrot set in color](/res/mandelbrot_set.png)
+Fractals explorer.
 
 ## Requirements
 
-  - [premake5](https://github.com/premake/premake-core)
+  - [CMake](https://cmake.org)
 
-## Math
+## Development
 
-z = a + bi
+Clone repository with `--recursive` flag
 
-c = x + yi
+```sh
+git clone --recursive git@github.com:KTheXIII/fractals.git
+```
 
-f(z) = z^2 + c
+Update the submodules.
 
-(a+bi)^2 = a^2 + 2abi - b^2
+```sh
+git submodule update --init --recursive
+```
 
-real = a^2 - b^2 + x
+Use `cmake` to generate the `Build System` script.
 
-imaginary = 2abi + yi
+```sh
+cmake -S . -Bbuild
+```
+
+```sh
+cmake --build build -j4
+```
 

@@ -1,3 +1,9 @@
-[submodule "Mandelbrot/vendor/GLFW"]
-	path = Mandelbrot/vendor/GLFW
+[submodule "deps/spdlog"]
+	path = deps/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "deps/glad"]
+	path = deps/glad
+	url = https://github.com/mononerv/glad.git
+[submodule "deps/glfw"]
+	path = deps/glfw
 	url = https://github.com/glfw/glfw.git

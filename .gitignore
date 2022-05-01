@@ -1,12 +1,12 @@
 # Binaries
-**/bin
-**/obj
+bin
+obj
+lib
 
-# Generated Files
-mandelbrot.ppm
-mandelbrot.png
-
-# Generated Workspaces
+# CMake
+build
+build-*
+cmake-build-*
 
 # Xcode
 *.xcworkspace
@@ -23,5 +23,19 @@ mandelbrot.png
 Makefile
 *.make
 
+# nvim
+.ccls
+.ccls-cache
+compile_commands.json
+
 # Visual Studio Code
 .vscode
+
+# IntelliJ
+.idea
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
