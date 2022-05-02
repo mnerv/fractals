@@ -1,3 +1,11 @@
+/**
+ * @file   window.hpp
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Window abstraction layer for GLFW.
+ * @date   2022-05-03
+ *
+ * @copyright Copyright (c) 2022
+ */
 #ifndef FRACTALS_WINDOW_HPP
 #define FRACTALS_WINDOW_HPP
 
@@ -38,6 +46,7 @@ class window {
     }
     auto swap() -> void;
     auto poll() -> void;
+    auto time() const -> double { return glfwGetTime(); }
 
     auto get_key(std::int32_t key) -> std::int32_t {
         return glfwGetKey(m_window, key);

@@ -1,3 +1,11 @@
+/**
+ * @file   mono.hpp
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Common includes.
+ * @date   2022-05-03
+ *
+ * @copyright Copyright (c) 2022
+ */
 #ifndef FRACTALS_MONO_HPP
 #define FRACTALS_MONO_HPP
 

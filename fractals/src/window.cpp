@@ -1,3 +1,11 @@
+/**
+ * @file   window.cpp
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Window abstraction layer for GLFW.
+ * @date   2022-05-03
+ *
+ * @copyright Copyright (c) 2022
+ */
 #include "window.hpp"
 
 namespace mono {

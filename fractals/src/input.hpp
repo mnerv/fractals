@@ -1,3 +1,11 @@
+/**
+ * @file   input.hpp
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Input interface for ease of use for handling click and press events.
+ * @date   2022-05-03
+ *
+ * @copyright Copyright (c) 2022
+ */
 #ifndef FRACTALS_INPUT_HPP
 #define FRACTALS_INPUT_HPP
 

@@ -1,3 +1,11 @@
+/**
+ * @file   buffer.cpp
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Buffer implemenation for OpenGL.
+ * @date   2022-05-03
+ *
+ * @copyright Copyright (c) 2022
+ */
 #include "buffer.hpp"
 
 #include "glad/glad.h"

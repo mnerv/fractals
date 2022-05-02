@@ -1,3 +1,11 @@
+/**
+ * @file   shader.cpp
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Shader implemenation for OpenGL.
+ * @date   2022-05-03
+ *
+ * @copyright Copyright (c) 2022
+ */
 #include "shader.hpp"
 
 #include "glad/glad.h"
@@ -68,6 +76,13 @@ auto shader::mat4(std::string const& name, glm::mat4 const& value, bool const& t
     bind();
     glUniformMatrix4fv(uniform_location(name), 1, (transpose ? GL_TRUE : GL_FALSE),
                        glm::value_ptr(value));
+}
+
+auto shader::str() const -> std::string {
+    std::string str{"mono::shader { "};
+    str += "id: " + std::to_string(m_id);
+    str += " }";
+    return str;
 }
 
 auto shader::compile(std::uint32_t const& type, char const* source) -> std::uint32_t {

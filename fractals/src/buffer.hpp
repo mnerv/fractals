@@ -1,3 +1,12 @@
+/**
+ * @file   buffer.hpp
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Buffer abstraction layer for OpenGL.
+ *         Vertex, Index and Array buffer interface.
+ * @date   2022-05-03
+ *
+ * @copyright Copyright (c) 2022
+ */
 #ifndef FRACTALS_BUFFER_HPP
 #define FRACTALS_BUFFER_HPP
 

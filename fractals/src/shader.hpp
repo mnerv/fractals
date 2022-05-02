@@ -1,3 +1,11 @@
+/**
+ * @file   shader.hpp
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Shader implemenation for OpenGL.
+ * @date   2022-05-03
+ *
+ * @copyright Copyright (c) 2022
+ */
 #ifndef FRACTALS_SHADER_HPP
 #define FRACTALS_SHADER_HPP
 
@@ -44,12 +52,7 @@ class shader {
     auto mat4(std::string const& name, glm::mat4 const& value, bool const& transpose = false) -> void;
 
   public:
-    [[nodiscard]] auto str() const -> std::string {
-        std::string str{"mono::shader { "};
-        str += "id: " + std::to_string(m_id);
-        str += " }";
-        return str;
-    }
+    [[nodiscard]] auto str() const -> std::string;
 
   private:
     static auto compile(std::uint32_t const& type, char const* source) -> std::uint32_t;
