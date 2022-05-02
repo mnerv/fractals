@@ -30,12 +30,14 @@ target_link_libraries(${PROJECT_NAME}
     glfw
     glad
     spdlog
+    glm
 )
 include_directories(${PROJECT_NAME}
     "${PROJECT_SOURCE_DIR}/src"
     glfw
     glad
     spdlog
+    glm
 )
 
 if (APPLE)

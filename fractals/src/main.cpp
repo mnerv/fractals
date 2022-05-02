@@ -6,6 +6,9 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "spdlog/spdlog.h"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 
 namespace mono {
 auto opengl_version() -> void {
@@ -16,11 +19,17 @@ auto opengl_version() -> void {
 }
 
 struct window_properties {
-    std::string title   = "no title";
+    std::string  title  = "no title";
     std::int32_t width  = 738;
     std::int32_t height = 480;
     std::int32_t xpos{INT32_MIN};
     std::int32_t ypos{INT32_MIN};
+};
+
+struct vertex {
+    glm::vec3 position;
+    glm::vec4 color;
+    glm::vec2 uv;
 };
 
 class window {
@@ -65,6 +74,8 @@ class window {
             data->xpos = xpos;
             data->ypos = ypos;
         });
+
+        glfwGetFramebufferSize(m_window, &m_data.buffer_width, &m_data.buffer_height);
     }
     ~window() {
         glfwTerminate();
@@ -82,6 +93,10 @@ class window {
     }
     auto swap() -> void { glfwSwapBuffers(m_window); }
     static auto poll() -> void { glfwPollEvents(); }
+
+    auto get_key(std::int32_t key) -> std::int32_t {
+        return glfwGetKey(m_window, key);
+    }
 
   public:
     [[nodiscard]] auto str() const -> std::string {
@@ -113,46 +128,178 @@ class window {
         return static_cast<window::data*>(glfwGetWindowUserPointer(window));
     }
 };
+
+auto basic_vertex_shader = R"(#version 410 core
+layout(location = 0) in vec3 a_position;
+layout(location = 1) in vec4 a_color;
+layout(location = 2) in vec2 a_uv;
+
+out vec4 io_color;
+out vec2 io_uv;
+
+uniform mat4 u_model;
+uniform mat4 u_view;
+uniform mat4 u_projection;
+
+void main() {
+    io_color = a_color;
+    io_uv    = a_uv;
+
+    //gl_Position = u_projection * u_view * u_model * vec4(a_position, 1.0f);
+    gl_Position = vec4(a_position, 1.0f);
+}
+)";
+
+auto basic_fragment_shader = R"(#version 410 core
+layout(location = 0) out vec4 o_color;
+
+in vec4 io_color;
+in vec2 io_uv;
+
+uniform float u_time;
+uniform vec2  u_resolution;
+uniform vec2  u_mouse;
+uniform vec4  u_color;
+
+uniform sampler2D u_texture;
+
+void main() {
+    o_color = io_color;
+}
+)";
+
+class shader {
+  public:
+    shader(std::string const& vertex_source, std::string const& fragment_source) {
+        auto vs = shader::compile(GL_VERTEX_SHADER,   vertex_source.c_str());
+        auto fs = shader::compile(GL_FRAGMENT_SHADER, fragment_source.c_str());
+        m_id    = shader::link(vs, fs);
+    }
+    ~shader() {
+        glDeleteProgram(m_id);
+    }
+
+    auto bind() const -> void { glUseProgram(m_id); }
+    auto unbind() const -> void { glUseProgram(0); }
+
+  public:
+    auto str() const -> std::string {
+        std::string str{"mono::shader { "};
+        str += "id: " + std::to_string(m_id);
+        str += " }";
+        return str;
+    }
+
+  private:
+    static auto compile(std::uint32_t const& type, char const* source) -> std::uint32_t {
+        std::uint32_t shader = glCreateShader(type);
+        glShaderSource(shader, 1, &source, nullptr);
+        glCompileShader(shader);
+
+        std::int32_t is_success;
+        constexpr auto LOG_SIZE = 512;
+        static char info_log[LOG_SIZE];
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &is_success);
+        if (!is_success) {
+            glGetShaderInfoLog(shader, LOG_SIZE, nullptr, info_log);
+            spdlog::error("SHADER::{}SHADER::COMPILE_FAILED {}",
+                    type == GL_VERTEX_SHADER ? "VERTEX_" : "FRAGMENT_",
+                    info_log);
+            throw std::runtime_error("Shader compilation error");
+        }
+
+        return shader;
+    }
+    static auto link(std::uint32_t const& fs, std::uint32_t const& vs) -> std::uint32_t {
+        std::uint32_t program = glCreateProgram();
+        glAttachShader(program, vs);
+        glAttachShader(program, fs);
+        glLinkProgram(program);
+
+        std::int32_t is_success;
+        constexpr auto LOG_SIZE = 512;
+        static char info_log[LOG_SIZE];
+        glGetProgramiv(program, GL_LINK_STATUS, &is_success);
+        if (!is_success) {
+            glGetProgramInfoLog(program, LOG_SIZE, nullptr, info_log);
+            spdlog::error("SHADER::LINK {}", info_log);
+            throw std::runtime_error("Shader linking error");
+        }
+
+        glUseProgram(program);
+        glDeleteShader(vs);
+        glDeleteShader(fs);
+        return program;
+    }
+
+  private:
+    std::uint32_t m_id;
+};
 }
 
 auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[]) -> std::int32_t {
-    mono::window window{};
+    mono::window window{{
+        "Fractals",
+    }};
 
-    std::uint8_t* image_buffer = nullptr;
-    image_buffer = new std::uint8_t[std::size_t(window.width()) * std::size_t(window.height()) * 4];
-    for (auto i = 0; i < window.height(); i++) {
-        for (auto j = 0; j < window.width(); j++) {
-            auto index = (i * 4) * window.width() + (j * 4);
+    mono::vertex vertices[]{
+        {{-1.0f,  1.0f,  0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+        {{ 1.0f,  1.0f,  0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{ 1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+        {{-1.0f, -1.0f,  0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+    };
+    std::uint32_t indices[]{
+        0, 1, 2,
+        0, 2, 3
+    };
 
-            image_buffer[index + 0] = 0;
-            image_buffer[index + 1] = 255;
-            image_buffer[index + 2] = 0;
-            image_buffer[index + 3] = 255;
-        }
-    }
+    mono::shader shader(mono::basic_vertex_shader, mono::basic_fragment_shader);
+    std::uint32_t array_buffer;
+    std::uint32_t vertex_buffer;
+    std::uint32_t index_buffer;
+    glGenVertexArrays(1, &array_buffer);
+    glGenBuffers(1, &vertex_buffer);
+    glGenBuffers(1, &index_buffer);
 
-    std::uint32_t texture_buffer;
-    glGenTextures(1, &texture_buffer);
-    glBindTexture(GL_TEXTURE_2D, texture_buffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, window.width(), window.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindVertexArray(array_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    spdlog::info(window.str());
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(mono::vertex), (void const*)(0 * sizeof(float)));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(mono::vertex), (void const*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(mono::vertex), (void const*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     auto is_running = true;
     while (is_running) {
         is_running = !window.shouldclose();
-        glViewport(0, 0, window.width(), window.height());
+
+        if (window.get_key(GLFW_KEY_Q) == GLFW_PRESS)
+            is_running = false;
+
+        glViewport(0, 0, window.buffer_width(), window.buffer_height());
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        shader.bind();
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+        glBindVertexArray(array_buffer);
+
+        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
 
         window.swap();
         mono::window::poll();
     }
-    glDeleteTextures(1, &texture_buffer);
-    delete [] image_buffer;
+
+    glDeleteVertexArrays(1, &array_buffer);
+    glDeleteBuffers(1, &vertex_buffer);
+    glDeleteBuffers(1, &index_buffer);
+
     return 0;
 }
 

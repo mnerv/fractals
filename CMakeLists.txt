@@ -11,6 +11,7 @@ set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(GLFW_UPDATE_MAPPINGS OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(deps/spdlog)
+add_subdirectory(deps/glm)
 add_subdirectory(deps/glfw)
 add_subdirectory(deps/glad)
 add_subdirectory(fractals)
