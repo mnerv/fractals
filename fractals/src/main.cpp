@@ -6,9 +6,15 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "spdlog/spdlog.h"
+
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
+#include "glm/mat2x2.hpp"
+#include "glm/mat3x3.hpp"
+#include "glm/mat4x4.hpp"
 
 namespace mono {
 auto opengl_version() -> void {
@@ -182,8 +188,56 @@ class shader {
     auto bind() const -> void { glUseProgram(m_id); }
     auto unbind() const -> void { glUseProgram(0); }
 
+  // uniform uploads
   public:
-    auto str() const -> std::string {
+    auto num(std::string const& name, std::uint32_t const& value) -> void {
+        bind();
+        glUniform1ui(uniform_location(name), value);
+    }
+    auto num(std::string const& name, std::int32_t const& value) -> void {
+        bind();
+        glUniform1i(uniform_location(name), value);
+    }
+    auto num(std::string const& name, float const& value) -> void {
+        bind();
+        glUniform1f(uniform_location(name), value);
+    }
+    auto num(std::string const& name, std::int32_t const& count, float const* value) -> void {
+        bind();
+        glUniform1fv(uniform_location(name), count, value);
+    }
+
+    auto vec2(std::string const& name, glm::vec2 const& value) -> void {
+        bind();
+        glUniform2fv(uniform_location(name), glm::vec2::length(), glm::value_ptr(value));
+    }
+    auto vec3(std::string const& name, glm::vec3 const& value) -> void {
+        bind();
+        glUniform3fv(uniform_location(name), glm::vec3::length(), glm::value_ptr(value));
+    }
+    auto vec4(std::string const& name, glm::vec3 const& value) -> void {
+        bind();
+        glUniform4fv(uniform_location(name), glm::vec4::length(), glm::value_ptr(value));
+    }
+
+    auto mat2(std::string const& name, glm::mat2 const& value, bool const& transpose = false) -> void {
+        bind();
+        glUniformMatrix2fv(uniform_location(name), glm::mat2::length(),
+                           (transpose ? GL_TRUE : GL_FALSE), glm::value_ptr(value));
+    }
+    auto mat3(std::string const& name, glm::mat3 const& value, bool const& transpose = false) -> void {
+        bind();
+        glUniformMatrix3fv(uniform_location(name), glm::mat3::length(),
+                           (transpose ? GL_TRUE : GL_FALSE), glm::value_ptr(value));
+    }
+    auto mat4(std::string const& name, glm::mat4 const& value, bool const& transpose = false) -> void {
+        bind();
+        glUniformMatrix4fv(uniform_location(name), glm::mat4::length(),
+                           (transpose ? GL_TRUE : GL_FALSE), glm::value_ptr(value));
+    }
+
+  public:
+    [[nodiscard]] auto str() const -> std::string {
         std::string str{"mono::shader { "};
         str += "id: " + std::to_string(m_id);
         str += " }";
@@ -232,8 +286,63 @@ class shader {
         return program;
     }
 
+    auto uniform_location(std::string const& name) const -> std::int32_t {
+        return glGetUniformLocation(m_id, name.c_str());
+    }
+
   private:
     std::uint32_t m_id;
+};
+
+class vertex_buffer {
+  public:
+    vertex_buffer(void const* data, std::uint32_t const& size) {
+        glGenBuffers(1, &m_buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
+        glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    }
+    ~vertex_buffer() {
+        glDeleteBuffers(1, &m_buffer);
+    }
+
+    auto bind() const -> void { glBindBuffer(GL_ARRAY_BUFFER, m_buffer); }
+    auto unbind() const -> void { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+
+  private:
+    std::uint32_t m_buffer;
+};
+
+class index_buffer {
+  public:
+    index_buffer(void const* data, std::uint32_t const& size) {
+        glGenBuffers(1, &m_buffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    }
+    ~index_buffer() { glDeleteBuffers(1, &m_buffer); }
+
+    auto bind() const -> void { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer); }
+    auto unbind() const -> void { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
+
+  private:
+    std::uint32_t m_buffer;
+};
+
+class array_buffer {
+  public:
+    array_buffer() {
+        glGenVertexArrays(1, &m_buffer);
+        glBindVertexArray(m_buffer);
+    }
+    ~array_buffer() {
+        glDeleteVertexArrays(1, &m_buffer);
+    }
+
+    auto bind() const -> void { glBindVertexArray(m_buffer); }
+    auto unbind() const -> void { glBindVertexArray(0); }
+
+  private:
+    std::uint32_t m_buffer;
 };
 }
 
@@ -254,18 +363,9 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     };
 
     mono::shader shader(mono::basic_vertex_shader, mono::basic_fragment_shader);
-    std::uint32_t array_buffer;
-    std::uint32_t vertex_buffer;
-    std::uint32_t index_buffer;
-    glGenVertexArrays(1, &array_buffer);
-    glGenBuffers(1, &vertex_buffer);
-    glGenBuffers(1, &index_buffer);
-
-    glBindVertexArray(array_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    mono::array_buffer array_buffer{};
+    mono::vertex_buffer vertex_buffer{vertices, sizeof(vertices)};
+    mono::index_buffer index_buffer{indices, sizeof(indices)};
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(mono::vertex), (void const*)(0 * sizeof(float)));
     glEnableVertexAttribArray(0);
@@ -286,20 +386,14 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader.bind();
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-        glBindVertexArray(array_buffer);
-
+        array_buffer.bind();
+        vertex_buffer.bind();
+        index_buffer.bind();
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
 
         window.swap();
         mono::window::poll();
     }
 
-    glDeleteVertexArrays(1, &array_buffer);
-    glDeleteBuffers(1, &vertex_buffer);
-    glDeleteBuffers(1, &index_buffer);
-
     return 0;
 }
-
