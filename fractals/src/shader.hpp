@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <string>
 
+#include "mono.hpp"
+
 #include "spdlog/spdlog.h"
 
 #include "glm/gtc/type_ptr.hpp"
@@ -16,6 +18,9 @@
 
 namespace mono {
 class shader {
+  public:
+    static auto make(std::string const& vertex_source, std::string const& fragment_source) -> mono::ref<shader>;
+
   public:
     shader(std::string const& vertex_source, std::string const& fragment_source);
     ~shader();

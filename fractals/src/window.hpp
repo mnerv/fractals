@@ -4,6 +4,10 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <vector>
+
+#include "mono.hpp"
+#include "input.hpp"
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -32,11 +36,15 @@ class window {
     auto set_position(std::int32_t const& x, std::int32_t const& y) -> void {
         glfwSetWindowPos(m_window, x, y);
     }
-    auto swap() -> void { glfwSwapBuffers(m_window); }
-    static auto poll() -> void { glfwPollEvents(); }
+    auto swap() -> void;
+    auto poll() -> void;
 
     auto get_key(std::int32_t key) -> std::int32_t {
         return glfwGetKey(m_window, key);
+    }
+    auto make_key(std::int32_t const& key) -> ref<state::key> {
+        m_keys.push_back(state::key::make(key));
+        return m_keys.back();
     }
 
   public:
@@ -52,6 +60,7 @@ class window {
 
   private:
     GLFWwindow* m_window{nullptr};
+    std::vector<ref<state::key>> m_keys{};
 
     struct data {
         std::string title;

@@ -3,6 +3,15 @@
 #include "glad/glad.h"
 
 namespace mono {
+//static auto basic_vertex_shader = R"(
+//)";
+//static auto basic_fragment_shader = R"(
+//)";
+
+auto shader::make(const std::string &vertex_source, const std::string &fragment_source) -> mono::ref<shader> {
+    return make_ref<shader>(vertex_source, fragment_source);
+}
+
 shader::shader(const std::string &vertex_source, const std::string &fragment_source) {
     auto vs = shader::compile(GL_VERTEX_SHADER,   vertex_source.c_str());
     auto fs = shader::compile(GL_FRAGMENT_SHADER, fragment_source.c_str());

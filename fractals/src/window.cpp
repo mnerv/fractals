@@ -55,4 +55,12 @@ window::window(const window_properties &props) {
 window::~window() {
     glfwTerminate();
 }
+
+auto window::swap() -> void { glfwSwapBuffers(m_window); }
+auto window::poll() -> void {
+    std::for_each(std::begin(m_keys), std::end(m_keys), [&](auto& key){
+        key->update(glfwGetKey(m_window, key->value));
+    });
+    glfwPollEvents();
+}
 }
