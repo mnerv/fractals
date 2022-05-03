@@ -55,36 +55,13 @@ renderbuffer::~renderbuffer() noexcept {
     glDeleteRenderbuffers(1, &m_buffer);
 }
 
-auto renderbuffer::resize(std::int32_t const& width, std::int32_t const& height) -> void {
+auto renderbuffer::resize(std::int32_t const& width, std::int32_t const& height) const -> void {
     bind();
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
     unbind();
 }
 auto renderbuffer::bind() const -> void { glBindRenderbuffer(GL_RENDERBUFFER, m_buffer); }
 auto renderbuffer::unbind() const -> void { glBindRenderbuffer(GL_RENDERBUFFER, 0); }
-
-framebuffer::framebuffer() {
-    glGenFramebuffers(1, &m_buffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_buffer);
-}
-framebuffer::~framebuffer() noexcept {
-    glDeleteFramebuffers(1, &m_buffer);
-}
-
-auto framebuffer::bind() const -> void {
-    glBindFramebuffer(GL_FRAMEBUFFER, m_buffer);
-}
-auto framebuffer::unbind() const -> void { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
-auto framebuffer::texture(mono::texture const& tex) -> void {
-    tex.bind();
-    tex.param(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    tex.param(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex.buffer(), 0);
-}
-auto framebuffer::render(renderbuffer const& render) -> void {
-    render.bind();
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, render.buffer());
-}
 
 }
 

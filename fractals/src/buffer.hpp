@@ -49,7 +49,7 @@ class array_buffer {
     auto unbind() const -> void;
 
   private:
-    std::uint32_t m_buffer;
+    std::uint32_t m_buffer{};
 };
 
 class renderbuffer {
@@ -60,23 +60,8 @@ class renderbuffer {
     auto bind() const -> void;
     auto unbind() const -> void;
 
-    auto resize(std::int32_t const& width, std::int32_t const& height) -> void;
-    auto buffer() const -> std::uint32_t { return m_buffer; }
-
-  private:
-    std::uint32_t m_buffer{};
-};
-
-class framebuffer {
-  public:
-    framebuffer();
-    ~framebuffer() noexcept;
-
-    auto bind() const -> void;
-    auto unbind() const -> void;
-
-    auto texture(texture const& tex) -> void;
-    auto render(renderbuffer const& render) -> void;
+    auto resize(std::int32_t const& width, std::int32_t const& height) const -> void;
+    [[nodiscard]] auto buffer() const -> std::uint32_t { return m_buffer; }
 
   private:
     std::uint32_t m_buffer{};

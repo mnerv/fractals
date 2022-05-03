@@ -16,21 +16,19 @@ uniform sampler2D u_texture1;
 
 int get_neighbors(ivec2 p) {
     int num = 0;
-
     for (int y = -1; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
             if (y == 0 && x == 0) continue;
             num += texelFetch(u_texture1, p + ivec2(x, y), 0).r > 0.5 ? 1 : 0;
         }
     }
-
     return num;
 }
 
 void main() {
     vec2 uv = (io_uv - 0.5) * u_res / u_res.y;
     vec4 color = vec4(0.0);
-    if (u_frame < 30) {
+    if (u_frame < 1) {
         color = texture(u_texture, io_uv);
         o_color = color;
         return;

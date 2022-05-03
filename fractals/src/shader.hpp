@@ -27,7 +27,7 @@
 namespace mono {
 class shader {
   public:
-    static auto make(std::string const& vertex_source, std::string const& fragment_source) -> mono::ref<shader>;
+    static auto make(std::string const& vertex_source, std::string const& fragment_source) -> local<shader>;
 
   public:
     shader(std::string const& vertex_source, std::string const& fragment_source);

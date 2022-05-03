@@ -11,13 +11,43 @@
 #include "glad/glad.h"
 
 namespace mono {
-//static auto basic_vertex_shader = R"(
-//)";
-//static auto basic_fragment_shader = R"(
-//)";
+[[maybe_unused]]static auto basic_vertex_shader = R"(#version 410 core
+layout(location = 0) in vec3 a_position;
+layout(location = 1) in vec4 a_color;
+layout(location = 2) in vec2 a_uv;
 
-auto shader::make(const std::string &vertex_source, const std::string &fragment_source) -> mono::ref<shader> {
-    return make_ref<shader>(vertex_source, fragment_source);
+out vec4 io_color;
+out vec2 io_uv;
+
+uniform mat4 u_model;
+uniform mat4 u_view;
+uniform mat4 u_projection;
+
+void main() {
+    io_color = a_color;
+    io_uv    = a_uv;
+
+    gl_Position = vec4(a_position, 1.0f);
+}
+)";
+[[maybe_unused]]static auto basic_fragment_shader = R"(#version 410 core
+layout(location = 0) out vec4 color;
+
+in vec4 io_color;
+in vec2 io_uv;
+
+uniform vec4 u_color;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform sampler2D u_texture;
+
+void main() {
+    color = io_color;
+}
+)";
+
+auto shader::make(const std::string &vertex_source, const std::string &fragment_source) -> local<shader> {
+    return make_local<shader>(vertex_source, fragment_source);
 }
 
 shader::shader(const std::string &vertex_source, const std::string &fragment_source) {
