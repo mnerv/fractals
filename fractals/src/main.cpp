@@ -95,21 +95,24 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     auto reload_key = window.make_key(GLFW_KEY_R);
     std::uint32_t frame = 0;
 
-    //std::random_device rdev{};
-    std::mt19937 rng{1};  // pass rdev into as seed
+    std::random_device rdev;
+    std::mt19937 rng{rdev()};  // pass rdev into as seed
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 
     mono::image noise_image{width, height};
-    for (auto i = 0; i < noise_image.height(); i++) {
-        for (auto j = 0; j < noise_image.width(); j++) {
-            auto data = std::uint8_t(255.0 * dist(rng));
-            noise_image.set(j, i, data, data, data);
+    auto generate_noise = [&] {
+        for (auto i = 0; i < noise_image.height(); i++) {
+            for (auto j = 0; j < noise_image.width(); j++) {
+                auto data = std::uint8_t(255.0 * dist(rng));
+                noise_image.set(j, i, data, data, data);
+            }
         }
-    }
-    mono::texture noise_texture{noise_image};
-    noise_texture.param(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    noise_texture.param(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    noise_texture.mipmap();
+    };
+    generate_noise();
+    auto noise_texture = mono::make_ref<mono::texture>(noise_image);
+    noise_texture->param(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    noise_texture->param(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    noise_texture->mipmap();
 
     auto is_running = true;
     while (is_running) {
@@ -122,6 +125,13 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             is_running = false;
         if (key::is_clicked(reload_key)) {
             spdlog::info("reload shader");
+
+            noise_image.resize(width, height);
+            generate_noise();
+            noise_texture = mono::make_ref<mono::texture>(noise_image);
+            noise_texture->param(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            noise_texture->param(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            noise_texture->mipmap();
             try {
                 shader = load_shader();
             } catch (std::runtime_error const& e) {
@@ -155,7 +165,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         shader->vec2("u_res", {width, height});
         shader->num("u_frame", frame);
         shader->num("u_texture", 0);
-        noise_texture.bind(0);
+        noise_texture->bind(0);
         shader->num("u_texture1", 1);
         render_texture_final.bind(1);
 
@@ -165,7 +175,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
         framebuffer.unbind();
 
-        // STORE LAST PASS INTO ANOTHER BUFFER
+        // SECOND PASS - STORE LAST COMPUTATION
         framebuffer_final.bind();
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -180,7 +190,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
         framebuffer_final.unbind();
 
-        // SECOND PASS
+        // OUTPUT TO SCREEN PASS
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
