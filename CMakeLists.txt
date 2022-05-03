@@ -9,10 +9,12 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(GLFW_UPDATE_MAPPINGS OFF CACHE BOOL "" FORCE)
+set(BUILD_STATIC_LIBS ON)
 
 add_subdirectory(deps/spdlog)
 add_subdirectory(deps/glm)
 add_subdirectory(deps/glfw)
 add_subdirectory(deps/glad)
+
 add_subdirectory(fractals)
 

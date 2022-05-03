@@ -26,27 +26,36 @@ file(GLOB_RECURSE TARGET_SOURCE_FILES
 )
 add_executable(${PROJECT_NAME} ${TARGET_SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME}
-    -lpthread
     glfw
     glad
     spdlog
-    glm
+    glm::glm_static
 )
 include_directories(${PROJECT_NAME}
     "${PROJECT_SOURCE_DIR}/src"
     glfw
     glad
     spdlog
-    glm
+    glm::glm_static
 )
+
+if (NOT WIN32)
+    target_link_libraries(${PROJECT_NAME}
+        "-lpthread"
+    )
+endif()
 
 if (APPLE)
     target_link_libraries(${PROJECT_NAME}
-                "-framework Cocoa"
-                "-framework IOKit"
-                "-framework CoreVideo"
-                "-framework OpenGL"
-            )
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework CoreVideo"
+        "-framework OpenGL"
+    )
+elseif(WIN32)
+    target_link_libraries(${PROJECT_NAME}
+        "OpenGL32.lib"
+    )
 endif()
 
 if (FRACTALS_RUN_TARGET)

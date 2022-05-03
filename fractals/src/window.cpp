@@ -6,6 +6,7 @@
  *
  * @copyright Copyright (c) 2022
  */
+#include <algorithm>
 #include "window.hpp"
 
 namespace mono {
