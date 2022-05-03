@@ -21,7 +21,7 @@
 #include "GLFW/glfw3.h"
 
 namespace mono {
-struct window_properties {
+struct window_props {
     std::string  title  = "no title";
     std::int32_t width  = 738;
     std::int32_t height = 480;
@@ -31,7 +31,7 @@ struct window_properties {
 
 class window {
   public:
-    explicit window(window_properties const& props = {});
+    explicit window(window_props const& props = {});
     ~window();
 
     [[nodiscard]] auto shouldclose() const -> bool { return glfwWindowShouldClose(m_window); }
@@ -39,8 +39,8 @@ class window {
     [[nodiscard]] auto height() const -> std::int32_t { return m_data.height; }
     [[nodiscard]] auto buffer_width()  const -> std::int32_t { return m_data.buffer_width; }
     [[nodiscard]] auto buffer_height() const -> std::int32_t { return m_data.buffer_height; }
-    [[nodiscard]] auto x() const -> std::int32_t { return m_data.xpos; }
-    [[nodiscard]] auto y() const -> std::int32_t { return m_data.ypos; }
+    [[nodiscard]] auto xpos() const -> std::int32_t { return m_data.xpos; }
+    [[nodiscard]] auto ypos() const -> std::int32_t { return m_data.ypos; }
     auto set_position(std::int32_t const& x, std::int32_t const& y) -> void {
         glfwSetWindowPos(m_window, x, y);
     }

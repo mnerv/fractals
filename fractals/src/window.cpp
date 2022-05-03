@@ -16,7 +16,7 @@ static auto setup_opengl() -> void {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 }
 
-window::window(const window_properties &props) {
+window::window(const window_props &props) {
     if (!glfwInit()) throw std::runtime_error("Error initializing GLFW!");
     mono::setup_opengl();
     m_data.title  = props.title;
