@@ -17,8 +17,9 @@ set(CMAKE_C_STANDARD 17)
 if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wconversion -Werror")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /wd4201")
 endif()
+
 # source files and includes
 file(GLOB_RECURSE TARGET_SOURCE_FILES
     "${PROJECT_SOURCE_DIR}/src/*.hpp"
@@ -51,6 +52,13 @@ if (APPLE)
         "-framework IOKit"
         "-framework CoreVideo"
         "-framework OpenGL"
+    )
+elseif (LINUX)
+    target_link_libraries(${PROJECT_NAME}
+        "-dl"
+        "-m"
+        "-GL"
+        "-X11"
     )
 elseif(WIN32)
     target_link_libraries(${PROJECT_NAME}
