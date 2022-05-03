@@ -33,47 +33,37 @@ auto shader::bind() const -> void { glUseProgram(m_id); }
 auto shader::unbind() const -> void { glUseProgram(0); }
 
 auto shader::num(std::string const& name, std::uint32_t const& value) -> void {
-    bind();
     glUniform1ui(uniform_location(name), value);
 }
 auto shader::num(std::string const& name, std::int32_t const& value) -> void {
-    bind();
     glUniform1i(uniform_location(name), value);
 }
 auto shader::num(std::string const& name, float const& value) -> void {
-    bind();
     glUniform1f(uniform_location(name), value);
 }
 auto shader::num(std::string const& name, std::int32_t const& count, float const* value) -> void {
-    bind();
     glUniform1fv(uniform_location(name), count, value);
 }
 
 auto shader::vec2(std::string const& name, glm::vec2 const& value) -> void {
-    bind();
     glUniform2fv(uniform_location(name), 1, glm::value_ptr(value));
 }
 auto shader::vec3(std::string const& name, glm::vec3 const& value) -> void {
-    bind();
     glUniform3fv(uniform_location(name), 1, glm::value_ptr(value));
 }
 auto shader::vec4(std::string const& name, glm::vec3 const& value) -> void {
-    bind();
     glUniform4fv(uniform_location(name), 1, glm::value_ptr(value));
 }
 
 auto shader::mat2(std::string const& name, glm::mat2 const& value, bool const& transpose) -> void {
-    bind();
     glUniformMatrix2fv(uniform_location(name), 1, (transpose ? GL_TRUE : GL_FALSE),
                        glm::value_ptr(value));
 }
 auto shader::mat3(std::string const& name, glm::mat3 const& value, bool const& transpose) -> void {
-    bind();
     glUniformMatrix3fv(uniform_location(name), 1, (transpose ? GL_TRUE : GL_FALSE),
                        glm::value_ptr(value));
 }
 auto shader::mat4(std::string const& name, glm::mat4 const& value, bool const& transpose) -> void {
-    bind();
     glUniformMatrix4fv(uniform_location(name), 1, (transpose ? GL_TRUE : GL_FALSE),
                        glm::value_ptr(value));
 }

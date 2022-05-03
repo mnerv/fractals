@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <fstream>
+#include <random>
 
 #include "spdlog/spdlog.h"
 
@@ -83,8 +84,32 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     framebuffer.texture(render_texture);
     framebuffer.render(render_buffer);
 
+    mono::renderbuffer render_buffer_final{width, height};
+    mono::texture render_texture_final{width, height};
+    mono::framebuffer framebuffer_final{};
+    framebuffer_final.texture(render_texture_final);
+    framebuffer_final.render(render_buffer_final);
+
+
     auto quit_key   = window.make_key(GLFW_KEY_Q);
     auto reload_key = window.make_key(GLFW_KEY_R);
+    std::uint32_t frame = 0;
+
+    //std::random_device rdev{};
+    std::mt19937 rng{1};  // pass rdev into as seed
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+    mono::image noise_image{width, height};
+    for (auto i = 0; i < noise_image.height(); i++) {
+        for (auto j = 0; j < noise_image.width(); j++) {
+            auto data = std::uint8_t(255.0 * dist(rng));
+            noise_image.set(j, i, data, data, data);
+        }
+    }
+    mono::texture noise_texture{noise_image};
+    noise_texture.param(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    noise_texture.param(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    noise_texture.mipmap();
 
     auto is_running = true;
     while (is_running) {
@@ -97,7 +122,12 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             is_running = false;
         if (key::is_clicked(reload_key)) {
             spdlog::info("reload shader");
-            shader = load_shader();
+            try {
+                shader = load_shader();
+            } catch (std::runtime_error const& e) {
+                spdlog::error(e.what());
+            }
+            frame = 0;
         }
         framebuffer.bind();
         render_texture.resize(width, height);
@@ -106,8 +136,16 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         framebuffer.render(render_buffer);
         framebuffer.unbind();
 
+        framebuffer_final.bind();
+        render_texture_final.resize(width, height);
+        render_buffer_final.resize(width, height);
+        framebuffer_final.texture(render_texture_final);
+        framebuffer_final.render(render_buffer_final);
+        framebuffer_final.unbind();
+
         // FIRST PASS
         framebuffer.bind();
+
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -115,11 +153,32 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         shader->bind();
         shader->num("u_time", float(window.time()));
         shader->vec2("u_res", {width, height});
+        shader->num("u_frame", frame);
+        shader->num("u_texture", 0);
+        noise_texture.bind(0);
+        shader->num("u_texture1", 1);
+        render_texture_final.bind(1);
+
         array_buffer.bind();
         vertex_buffer.bind();
         index_buffer.bind();
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
         framebuffer.unbind();
+
+        // STORE LAST PASS INTO ANOTHER BUFFER
+        framebuffer_final.bind();
+        glViewport(0, 0, width, height);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        render_shader->bind();
+        render_shader->num("u_texture", 0);
+        render_texture.bind(0);
+
+        array_buffer.bind();
+        vertex_buffer.bind();
+        index_buffer.bind();
+        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
+        framebuffer_final.unbind();
 
         // SECOND PASS
         glViewport(0, 0, width, height);
@@ -127,7 +186,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         glClear(GL_COLOR_BUFFER_BIT);
         render_shader->bind();
         render_shader->num("u_texture", 0);
-        render_texture.bind();
+        render_texture.bind(0);
 
         array_buffer.bind();
         vertex_buffer.bind();
@@ -136,6 +195,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
 
         window.swap();
         window.poll();
+        frame++;
     }
 
     return 0;

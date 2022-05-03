@@ -45,11 +45,10 @@ array_buffer::~array_buffer() noexcept {
 auto array_buffer::bind() const -> void { glBindVertexArray(m_buffer); }
 auto array_buffer::unbind() const -> void { glBindVertexArray(0); }
 
-renderbuffer::renderbuffer(std::int32_t const& width, std::int32_t const& height)
-    : m_width(width), m_height(height) {
+renderbuffer::renderbuffer(std::int32_t const& width, std::int32_t const& height) {
     glGenRenderbuffers(1, &m_buffer);
     glBindRenderbuffer(GL_RENDERBUFFER, m_buffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_width, m_height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 renderbuffer::~renderbuffer() noexcept {

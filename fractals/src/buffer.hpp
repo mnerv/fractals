@@ -65,8 +65,6 @@ class renderbuffer {
 
   private:
     std::uint32_t m_buffer{};
-    std::int32_t  m_width;
-    std::int32_t  m_height;
 };
 
 class framebuffer {
