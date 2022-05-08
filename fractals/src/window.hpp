@@ -13,9 +13,11 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "mono.hpp"
 #include "input.hpp"
+#include "event.hpp"
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -30,6 +32,9 @@ struct window_props {
 };
 
 class window {
+  public:
+    using event_fn = std::function<void(event const&)>;
+
   public:
     explicit window(window_props const& props = {});
     ~window();
@@ -47,6 +52,26 @@ class window {
     auto swap() -> void;
     auto poll() -> void;
     auto time() const -> double { return glfwGetTime(); }
+
+    template <typename Callable>
+    auto add_event_listener(event_type const& type, Callable const& func) -> std::size_t {
+        auto id = (std::size_t)&func;
+        if (m_data.events.find(type) == m_data.events.end()) {
+            std::unordered_map<std::size_t, event_fn> fns{};
+            fns.insert({id, event_fn{func}});
+            m_data.events.insert({type, fns});
+        } else {
+            m_data.events[type].insert({id, event_fn{func}});
+        }
+        return id;
+    }
+    template <typename Callable>
+    auto remove_event_listener(event_type const& type, [[maybe_unused]]Callable const& func) -> void {
+        auto id  = (std::size_t)&func;
+        auto fns = m_data.events.find(type);
+        if (fns != std::end(m_data.events))
+            fns->second.erase(id);
+    }
 
     auto get_key(std::int32_t key) -> std::int32_t {
         return glfwGetKey(m_window, key);
@@ -79,6 +104,8 @@ class window {
         std::int32_t buffer_height;
         std::int32_t xpos;
         std::int32_t ypos;
+
+        std::unordered_map<event_type, std::unordered_map<std::size_t, event_fn>> events;
     };
     data m_data{};
 

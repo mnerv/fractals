@@ -40,23 +40,60 @@ window::window(const window_props &props) {
     }
     glfwSetWindowUserPointer(m_window, &m_data);
     glfwSetWindowSizeCallback(m_window,
-                              [](GLFWwindow* window, std::int32_t width, std::int32_t height) {
-                                  auto data = mono::window::user_ptr(window);
-                                  data->width  = width;
-                                  data->height = height;
-                              });
+    [](GLFWwindow* window, std::int32_t width, std::int32_t height) {
+        auto data = mono::window::user_ptr(window);
+        data->width  = width;
+        data->height = height;
+    });
     glfwSetFramebufferSizeCallback(m_window,
-                                   [](GLFWwindow* window, std::int32_t width, std::int32_t height) {
-                                       auto data = mono::window::user_ptr(window);
-                                       data->buffer_width  = width;
-                                       data->buffer_height = height;
-                                   });
+    [](GLFWwindow* window, std::int32_t width, std::int32_t height) {
+        auto data = mono::window::user_ptr(window);
+        data->buffer_width  = width;
+        data->buffer_height = height;
+    });
     glfwSetWindowPosCallback(m_window,
-                             [](GLFWwindow* window, std::int32_t xpos, std::int32_t ypos) {
-                                 auto data = mono::window::user_ptr(window);
-                                 data->xpos = xpos;
-                                 data->ypos = ypos;
-                             });
+    [](GLFWwindow* window, std::int32_t xpos, std::int32_t ypos) {
+        auto data = mono::window::user_ptr(window);
+        data->xpos = xpos;
+        data->ypos = ypos;
+    });
+    glfwSetKeyCallback(m_window,
+    [](GLFWwindow* window, std::int32_t key, std::int32_t code, std::int32_t action, std::int32_t mods) {
+        auto data = mono::window::user_ptr(window);
+        if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+            auto it = data->events.find(event_type::key_down);
+            if (it == data->events.end()) return;
+            auto fns = it->second;
+
+            auto event = key_down_event(key, code, mods, action == GLFW_REPEAT);
+            std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
+                fn.second(event);
+            });
+        } else {
+            auto it = data->events.find(event_type::key_up);
+            if (it == data->events.end()) return;
+            auto fns = it->second;
+
+            auto event = key_up_event(key, code, mods);
+            std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
+                fn.second(event);
+            });
+        }
+
+    });
+    glfwSetDropCallback(m_window,
+    [](GLFWwindow* window, std::int32_t count, char const** paths){
+        [[maybe_unused]]auto data = mono::window::user_ptr(window);
+        // TODO: Fire an event for dropped path
+        if (count > 1) {
+            std::vector<std::string> paths{};
+            for (std::size_t i = 0; i < std::size_t(count); i++) {
+                paths.emplace_back(paths[i]);
+            }
+        } else {
+            std::string path{paths[0]};
+        }
+    });
 
     glfwGetFramebufferSize(m_window, &m_data.buffer_width, &m_data.buffer_height);
 }

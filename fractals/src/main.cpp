@@ -20,6 +20,7 @@
 #include "buffer.hpp"
 #include "texture.hpp"
 #include "framebuffer.hpp"
+#include "event.hpp"
 
 namespace mono {
 struct vertex {
@@ -42,7 +43,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     mono::window window{{
         "Fractals",
     }};
-    window.set_position(window.xpos(), 200);
+    //window.set_position(window.xpos(), 200);
 
     mono::vertex vertices[]{
         {{-1.0f,  1.0f,  0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
@@ -65,6 +66,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     auto shader = load_shader();
     auto render_shader = mono::shader::make(mono::read_text("./shaders/410.shader.gl.vert"),
                                             mono::read_text("./shaders/410.render.gl.frag"));
+    auto post_shader = mono::shader::make(mono::read_text("./shaders/410.shader.gl.vert"),
+                                          mono::read_text("./shaders/410.post.gl.frag"));
 
     mono::array_buffer array_buffer{};
     mono::vertex_buffer vertex_buffer{vertices, sizeof(vertices)};
@@ -106,8 +109,38 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glGenerateMipmap(GL_TEXTURE_2D);
 
+    auto current_time = window.time();
+    auto last_time    = current_time;
+    auto delta_time   = current_time - last_time;
+
+    auto zoom_in    = window.make_key(GLFW_KEY_F);
+    auto zoom_out   = window.make_key(GLFW_KEY_G);
+
+    auto left_key   = window.make_key(GLFW_KEY_A);
+    auto right_key  = window.make_key(GLFW_KEY_D);
+    auto up_key     = window.make_key(GLFW_KEY_W);
+    auto down_key   = window.make_key(GLFW_KEY_S);
+
+    float zoom       = 1.0f;
+    float zoom_speed = 0.15f;
+    float pan_speed  = 0.10f;
+    glm::vec2 location{0.0, 0.0};
+
+    auto key_down = [](mono::event const& e) {
+        spdlog::info(e.str());
+    };
+
+    spdlog::info("here: {:p}", static_cast<void const*>(&key_down));
+    auto id_event = window.add_event_listener(mono::event_type::key_down, key_down);
+    spdlog::info("evet: 0x{:x}", id_event);
+    window.remove_event_listener(mono::event_type::key_down, key_down);
+
     auto is_running = true;
     while (is_running) {
+        last_time    = current_time;
+        current_time = window.time();
+        delta_time   = current_time - last_time;
+
         is_running = !window.shouldclose();
         width  = window.buffer_width();
         height = window.buffer_height();
@@ -129,6 +162,24 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             }
             frame = 0;
         }
+        if (key::is_press(zoom_in)) {
+            zoom -= zoom_speed * float(delta_time);
+        }
+        if (key::is_press(zoom_out)) {
+            zoom += zoom_speed * float(delta_time);
+        }
+        if (key::is_press(right_key)) {
+            location.x += pan_speed * float(delta_time);
+        } else if (key::is_press(left_key)) {
+            location.x -= pan_speed * float(delta_time);
+        }
+
+        if (key::is_press(up_key)) {
+            location.y += pan_speed * float(delta_time);
+        } else if (key::is_press(down_key)) {
+            location.y -= pan_speed * float(delta_time);
+        }
+
         // FIRST PASS
         buffer_a.resize(width, height);
         buffer_a.bind();
@@ -143,6 +194,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         shader->num("u_frame", frame);
         shader->num("u_texture", 0);
         noise_texture->bind(0);
+
         shader->num("u_texture1", 1);
         buffer_b.texture()->bind(1);
 
@@ -172,9 +224,13 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        render_shader->bind();
-        render_shader->num("u_texture", 0);
-        buffer_a.texture()->bind(0);
+
+        post_shader->bind();
+        post_shader->vec2("u_res", {width, height});
+        post_shader->vec2("u_location", location);
+        post_shader->num("u_zoom", zoom);
+        post_shader->num("u_texture", 0);
+        buffer_b.texture()->bind(0);
 
         array_buffer.bind();
         vertex_buffer.bind();
