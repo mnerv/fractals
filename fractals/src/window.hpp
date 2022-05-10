@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <type_traits>
 
 #include "mono.hpp"
 #include "input.hpp"
@@ -34,6 +35,7 @@ struct window_props {
 class window {
   public:
     using event_fn = std::function<void(event const&)>;
+    using event_callback_map = std::unordered_map<std::size_t, event_fn>;
 
   public:
     explicit window(window_props const& props = {});
@@ -53,17 +55,25 @@ class window {
     auto poll() -> void;
     auto time() const -> double { return glfwGetTime(); }
 
+    auto get_key(std::int32_t key) -> std::int32_t {
+        return glfwGetKey(m_window, key);
+    }
+    auto make_key(std::int32_t const& key) -> ref<state::key> {
+        m_keys.push_back(state::key::make(key));
+        return m_keys.back();
+    }
+
+    // TODO: Add type constraints and maybe if possible have it so the lambda can have the inherit parameter type
     template <typename Callable>
-    auto add_event_listener(event_type const& type, Callable const& func) -> std::size_t {
-        auto id = (std::size_t)&func;
+    auto add_event_listener(event_type const& type, Callable const& func) -> void {
+        auto const id = (std::size_t)&func;
         if (m_data.events.find(type) == m_data.events.end()) {
-            std::unordered_map<std::size_t, event_fn> fns{};
-            fns.insert({id, event_fn{func}});
+            std::unordered_map<std::size_t, event_fn> fns{{id, func}};
             m_data.events.insert({type, fns});
         } else {
-            m_data.events[type].insert({id, event_fn{func}});
+            m_data.events[type].insert({id, func});
         }
-        return id;
+
     }
     template <typename Callable>
     auto remove_event_listener(event_type const& type, [[maybe_unused]]Callable const& func) -> void {
@@ -71,14 +81,6 @@ class window {
         auto fns = m_data.events.find(type);
         if (fns != std::end(m_data.events))
             fns->second.erase(id);
-    }
-
-    auto get_key(std::int32_t key) -> std::int32_t {
-        return glfwGetKey(m_window, key);
-    }
-    auto make_key(std::int32_t const& key) -> ref<state::key> {
-        m_keys.push_back(state::key::make(key));
-        return m_keys.back();
     }
 
   public:
@@ -97,7 +99,7 @@ class window {
     std::vector<ref<state::key>> m_keys{};
 
     struct data {
-        std::string title;
+        std::string  title;
         std::int32_t width;
         std::int32_t height;
         std::int32_t buffer_width;
@@ -105,7 +107,7 @@ class window {
         std::int32_t xpos;
         std::int32_t ypos;
 
-        std::unordered_map<event_type, std::unordered_map<std::size_t, event_fn>> events;
+        std::unordered_map<event_type, event_callback_map> events;
     };
     data m_data{};
 

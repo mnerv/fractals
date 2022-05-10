@@ -86,7 +86,6 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     mono::framebuffer buffer_a{width, height};
     mono::framebuffer buffer_b{width, height};
 
-    auto quit_key   = window.make_key(GLFW_KEY_Q);
     auto reload_key = window.make_key(GLFW_KEY_R);
     std::uint32_t frame = 0;
 
@@ -125,17 +124,24 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     float zoom_speed = 0.15f;
     float pan_speed  = 0.10f;
     glm::vec2 location{0.0, 0.0};
-
-    auto key_down = [](mono::event const& e) {
-        spdlog::info(e.str());
-    };
-
-    spdlog::info("here: {:p}", static_cast<void const*>(&key_down));
-    auto id_event = window.add_event_listener(mono::event_type::key_down, key_down);
-    spdlog::info("evet: 0x{:x}", id_event);
-    window.remove_event_listener(mono::event_type::key_down, key_down);
-
     auto is_running = true;
+    auto is_sim_pause = false;
+
+    auto key_down = [&](mono::event const& event) {
+        auto e = static_cast<mono::key_down_event const&>(event);
+        if (e.key() == GLFW_KEY_Q)
+            is_running = false;
+        if (e.key() == GLFW_KEY_SPACE)
+            is_sim_pause = true;
+    };
+    auto key_up = [&](mono::event const& event) {
+        auto e = static_cast<mono::key_up_event const&>(event);
+        if (e.key() == GLFW_KEY_SPACE)
+            is_sim_pause = false;
+    };
+    window.add_event_listener(mono::event_type::key_down, key_down);
+    window.add_event_listener(mono::event_type::key_up, key_up);
+
     while (is_running) {
         last_time    = current_time;
         current_time = window.time();
@@ -146,8 +152,6 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         height = window.buffer_height();
 
         using namespace mono::state;
-        if (key::is_clicked(quit_key))
-            is_running = false;
         if (key::is_clicked(reload_key)) {
             spdlog::info("reload shader");
 
@@ -181,28 +185,30 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         }
 
         // FIRST PASS
-        buffer_a.resize(width, height);
-        buffer_a.bind();
+        if (!is_sim_pause) {
+            buffer_a.resize(width, height);
+            buffer_a.bind();
 
-        glViewport(0, 0, width, height);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+            glViewport(0, 0, width, height);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        shader->bind();
-        shader->num("u_time", float(window.time()));
-        shader->vec2("u_res", {width, height});
-        shader->num("u_frame", frame);
-        shader->num("u_texture", 0);
-        noise_texture->bind(0);
+            shader->bind();
+            shader->num("u_time", float(window.time()));
+            shader->vec2("u_res", {width, height});
+            shader->num("u_frame", frame);
+            shader->num("u_texture", 0);
+            noise_texture->bind(0);
 
-        shader->num("u_texture1", 1);
-        buffer_b.texture()->bind(1);
+            shader->num("u_texture1", 1);
+            buffer_b.texture()->bind(1);
 
-        array_buffer.bind();
-        vertex_buffer.bind();
-        index_buffer.bind();
-        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
-        buffer_a.unbind();
+            array_buffer.bind();
+            vertex_buffer.bind();
+            index_buffer.bind();
+            glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
+            buffer_a.unbind();
+        }
 
         // SECOND PASS - STORE LAST COMPUTATION
         buffer_b.resize(width, height);

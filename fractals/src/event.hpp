@@ -26,7 +26,7 @@ enum class event_category : std::uint8_t {
 
 enum class event_type : std::uint32_t {
     none = 0,
-    drop, drops,
+    drop,
     window_resize, window_move, window_focus,
     buffer_resize,
     mouse_move,    mouse_press, mouse_release, mouse_wheel,
@@ -35,27 +35,25 @@ enum class event_type : std::uint32_t {
 
 class event {
   public:
-
-  public:
     event(event_type const& type, event_category const& category)
         : m_type(type), m_category(category) {}
     virtual ~event() = default;
 
-    auto type() const -> event_type { return m_type; }
-    auto category() const -> event_category { return  m_category; }
+    constexpr auto type() const -> event_type { return m_type; }
+    constexpr auto category() const -> event_category { return  m_category; }
     virtual auto name() const -> std::string = 0;
     virtual auto str() const -> std::string = 0;
 
   private:
-    [[maybe_unused]]event_type     m_type;
-    [[maybe_unused]]event_category m_category;
+    event_type     m_type{event_type::none};
+    event_category m_category{event_category::none};
 };
 
 class drop_event : public event {
   public:
-    drop_event(std::string const& path)
+    drop_event(std::vector<std::string> const& paths)
         : event(event_type::drop, event_category::application),
-          m_path(path) {};
+          m_paths(paths) {};
     ~drop_event() = default;
 
     auto name() const -> std::string override {
@@ -64,38 +62,17 @@ class drop_event : public event {
     auto str() const -> std::string override {
         using namespace std::string_literals;
         std::string str{name() + " { "};
-        str += "path: \"" + m_path + "\" }";
-        return str;
-    }
-
-    auto path() -> std::string { return m_path; }
-
-  private:
-    std::string m_path;
-};
-
-class drops_event : public event {
-  public:
-    drops_event(std::vector<std::string> const& path)
-        : event(event_type::drops, event_category::application),
-          m_paths(path) {};
-    ~drops_event() = default;
-
-    auto name() const -> std::string override {
-        return "drops_event";
-    }
-    auto str() const -> std::string override {
-        using namespace std::string_literals;
-        std::string str{name() + " { "};
         str += "size: " + std::to_string(m_paths.size()) + ", ";
-        str += "paths: [";
-        std::for_each(std::begin(m_paths), std::end(m_paths), [&](auto const& path){
-            str += "\"" + path + "\", ";
-        });
-        str += "] }";
+        str += "paths: [ ";
+        for (std::size_t i = 0; i < m_paths.size(); i++) {
+            str += "\"" + m_paths.at(i) + "\"";
+            if (i < m_paths.size() - 1) str += ", ";
+        }
+        str += " ] }";
         return str;
     }
 
+    auto size() -> std::size_t { return m_paths.size(); }
     auto paths() -> std::vector<std::string> { return m_paths; }
 
   private:
@@ -390,11 +367,9 @@ class key_up_event : public event {
 
 class key_typed_event : public event {
   public:
-    key_typed_event(std::int32_t const& key,
-                   std::int32_t const& scan,
-                   std::int32_t const& mods)
+    key_typed_event(std::uint32_t const& code_point)
         : event(event_type::key_typed, event_category::keyboard),
-          m_key(key), m_scan(scan), m_mods(mods) {}
+          m_code_point(code_point) {}
     ~key_typed_event() = default;
 
     auto name() const -> std::string override {
@@ -403,20 +378,14 @@ class key_typed_event : public event {
     auto str() const -> std::string override {
         using namespace std::string_literals;
         std::string str{name() + " { "};
-        str += "key: "  + std::to_string(m_key)  + ", ";
-        str += "scan: " + std::to_string(m_scan) + ", ";
-        str += "mods: " + std::to_string(m_mods) + " }";
+        str += "code: " + std::to_string(m_code_point) + " }";
         return str;
     }
 
-    auto key()  -> std::int32_t { return m_key; }
-    auto scan() -> std::int32_t { return m_scan; }
-    auto mods() -> std::int32_t { return m_mods; }
+    auto code() -> std::uint32_t { return m_code_point; }
 
   private:
-    std::int32_t m_key;
-    std::int32_t m_scan;
-    std::int32_t m_mods;
+    std::uint32_t m_code_point;
 };
 
 }
