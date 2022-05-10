@@ -7,11 +7,35 @@
  * @copyright Copyright (c) 2022
  */
 #include "buffer.hpp"
+#include <numeric>
 
 #include "glad/glad.h"
 #include "spdlog/spdlog.h"
 
 namespace mono {
+
+buffer_layout::buffer_layout(std::initializer_list<buffer_element> const& elements)
+    : m_elements(elements) {
+    m_stride = compute_stride();
+    compute_offset();  // set the correct element data offset
+}
+
+auto buffer_layout::compute_stride() const -> std::size_t {
+    auto strides = std::reduce(std::begin(m_elements), std::end(m_elements), std::size_t(0),
+    [](auto& acc, auto const& b) {
+        return acc + buffer_element::shader_type_size(b.type);
+    });
+    return strides;
+}
+
+auto buffer_layout::compute_offset() -> void {
+    std::uint32_t offset = 0;
+    for (std::size_t i = 0; i < m_elements.size(); i++) {
+        m_elements[i].offset = offset;
+        offset += buffer_element::shader_type_size(m_elements[i].type);
+    }
+}
+
 vertex_buffer::vertex_buffer(const void *data, std::uint32_t const& size) {
     glGenBuffers(1, &m_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer);

@@ -29,6 +29,25 @@ class shader {
   public:
     static auto make(std::string const& vertex_source, std::string const& fragment_source) -> local<shader>;
 
+    // shader types
+    enum class type : std::uint32_t {
+        none = 0,
+        // primitive types
+        boolean,
+        i8,  u8,
+        i16, u16,
+        i32, u32, p32,
+        f16, f32, f64,
+
+        // vector types (f32, i32, f64)
+        vec2,  vec3,  vec4,
+        ivec2, ivec3, ivec4,
+        dvec2, dvec3, dvec4,
+
+        // matrx nxn types (f32)
+        mat2, mat3, mat4,
+    };
+
   public:
     shader(std::string const& vertex_source, std::string const& fragment_source);
     ~shader();
