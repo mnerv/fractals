@@ -70,15 +70,12 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
                                           mono::read_text("./shaders/410.post.gl.frag"));
 
     mono::array_buffer array_buffer{};
-    mono::vertex_buffer vertex_buffer{vertices, sizeof(vertices)};
-    mono::index_buffer index_buffer{indices, sizeof(indices)};
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(mono::vertex), (void const*)(0 * sizeof(float)));
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(mono::vertex), (void const*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(mono::vertex), (void const*)(7 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    array_buffer.add_vertex_buffer(mono::vertex_buffer::make(vertices, sizeof(vertices), {
+        {mono::shader::type::vec3, "a_position"},
+        {mono::shader::type::vec4, "a_color"},
+        {mono::shader::type::vec2, "a_uv"},
+    }));
+    array_buffer.set_index_buffer(mono::index_buffer::make(indices, sizeof(indices)));
 
     auto width  = window.buffer_width();
     auto height = window.buffer_height();
@@ -204,8 +201,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             buffer_b.texture()->bind(1);
 
             array_buffer.bind();
-            vertex_buffer.bind();
-            index_buffer.bind();
+            array_buffer.vertex_buffer()->bind();
+            array_buffer.index_buffer()->bind();
             glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
             buffer_a.unbind();
         }
@@ -221,8 +218,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         buffer_a.texture()->bind(0);
 
         array_buffer.bind();
-        vertex_buffer.bind();
-        index_buffer.bind();
+        array_buffer.vertex_buffer()->bind();
+        array_buffer.index_buffer()->bind();
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
         buffer_b.unbind();
 
@@ -239,8 +236,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         buffer_b.texture()->bind(0);
 
         array_buffer.bind();
-        vertex_buffer.bind();
-        index_buffer.bind();
+        array_buffer.vertex_buffer()->bind();
+        array_buffer.index_buffer()->bind();
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
 
         window.swap();

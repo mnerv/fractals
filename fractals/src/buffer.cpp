@@ -21,11 +21,10 @@ buffer_layout::buffer_layout(std::initializer_list<buffer_element> const& elemen
 }
 
 auto buffer_layout::compute_stride() const -> std::size_t {
-    auto strides = std::reduce(std::begin(m_elements), std::end(m_elements), std::size_t(0),
-    [](auto& acc, auto const& b) {
+    return std::reduce(std::begin(m_elements), std::end(m_elements), std::size_t(0),
+    [](auto const& acc, auto const& b) {
         return acc + buffer_element::shader_type_size(b.type);
     });
-    return strides;
 }
 
 auto buffer_layout::compute_offset() -> void {
@@ -36,7 +35,8 @@ auto buffer_layout::compute_offset() -> void {
     }
 }
 
-vertex_buffer::vertex_buffer(const void *data, std::uint32_t const& size) {
+vertex_buffer::vertex_buffer(void const* data, std::uint32_t const& size, buffer_layout const& layout)
+    : m_layout(layout) {
     glGenBuffers(1, &m_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
     glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
@@ -47,6 +47,9 @@ vertex_buffer::~vertex_buffer() noexcept {
 
 auto vertex_buffer::bind() const -> void { glBindBuffer(GL_ARRAY_BUFFER, m_buffer); }
 auto vertex_buffer::unbind() const -> void { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+auto vertex_buffer::make(void const* data, std::uint32_t const& size, buffer_layout const& layout) -> local<vertex_buffer> {
+    return make_local<vertex_buffer>(data, size, layout);
+}
 
 index_buffer::index_buffer(void const* data, std::uint32_t const& size) {
     glGenBuffers(1, &m_buffer);
@@ -58,6 +61,10 @@ index_buffer::~index_buffer() noexcept { glDeleteBuffers(1, &m_buffer); }
 auto index_buffer::bind() const -> void { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer); }
 auto index_buffer::unbind() const -> void { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
 
+auto index_buffer::make(void const* data, std::uint32_t const& size) -> local<index_buffer> {
+    return make_local<index_buffer>(data, size);
+}
+
 array_buffer::array_buffer() {
     glGenVertexArrays(1, &m_buffer);
     glBindVertexArray(m_buffer);
@@ -68,6 +75,35 @@ array_buffer::~array_buffer() noexcept {
 
 auto array_buffer::bind() const -> void { glBindVertexArray(m_buffer); }
 auto array_buffer::unbind() const -> void { glBindVertexArray(0); }
+
+auto array_buffer::add_vertex_buffer(ref<mono::vertex_buffer> const& vertex_buffer) -> void {
+    bind();
+    vertex_buffer->bind();
+    auto const& layout = vertex_buffer->layout();
+    auto stride = layout.stride();
+
+    std::uint32_t index = 0;
+    std::for_each(std::begin(layout), std::end(layout), [&](buffer_element const& e) {
+        auto size   = buffer_element::component_count(e.type);
+        auto offset = e.offset;
+        switch(e.type) {
+            case shader::type::f32:
+            case shader::type::vec2:
+            case shader::type::vec3:
+            case shader::type::vec4:
+            case shader::type::mat2:
+            case shader::type::mat3:
+            case shader::type::mat4:
+                glVertexAttribPointer(index, size, GL_FLOAT, e.normalised ? GL_TRUE : GL_FALSE,
+                                      GLsizei(stride), (void const*)std::size_t(offset));
+                glEnableVertexAttribArray(index++);
+                break;
+            default: break;
+        }
+    });
+
+    m_vertex_buffer = vertex_buffer;
+}
 
 renderbuffer::renderbuffer(std::int32_t const& width, std::int32_t const& height) {
     glGenRenderbuffers(1, &m_buffer);

@@ -110,14 +110,21 @@ class buffer_layout {
 
 class vertex_buffer {
   public:
-    vertex_buffer(void const* data, std::uint32_t const& size);
+    vertex_buffer(void const* data, std::uint32_t const& size, buffer_layout const& layout);
     ~vertex_buffer() noexcept;
 
     auto bind() const -> void;
     auto unbind() const -> void;
 
+    auto set_layout(buffer_layout const& layout) -> void { m_layout = layout; }
+    auto layout() const -> buffer_layout const& { return m_layout; }
+
+  public:
+    static auto make(void const* data, std::uint32_t const& size, buffer_layout const& layout) -> local<vertex_buffer>;
+
   private:
     std::uint32_t m_buffer{};
+    buffer_layout m_layout{};
 };
 
 class index_buffer {
@@ -128,17 +135,8 @@ class index_buffer {
     auto bind() const -> void;
     auto unbind() const -> void;
 
-  private:
-    std::uint32_t m_buffer{};
-};
-
-class array_buffer {
   public:
-    array_buffer();
-    ~array_buffer() noexcept;
-
-    auto bind() const -> void;
-    auto unbind() const -> void;
+    static auto make(void const* data, std::uint32_t const& size) -> local<index_buffer>;
 
   private:
     std::uint32_t m_buffer{};
@@ -157,6 +155,25 @@ class renderbuffer {
 
   private:
     std::uint32_t m_buffer{};
+};
+
+class array_buffer {
+  public:
+    array_buffer();
+    ~array_buffer() noexcept;
+
+    auto bind() const -> void;
+    auto unbind() const -> void;
+
+    auto add_vertex_buffer(ref<mono::vertex_buffer> const& vertex_buffer) -> void;
+    auto set_index_buffer(ref<mono::index_buffer> const& index_buffer) -> void { m_index_buffer = index_buffer; }
+    auto vertex_buffer() const -> ref<mono::vertex_buffer> { return m_vertex_buffer; }
+    auto index_buffer() const -> ref<mono::index_buffer> { return m_index_buffer; }
+
+  private:
+    std::uint32_t m_buffer{};
+    ref<mono::vertex_buffer>       m_vertex_buffer;
+    ref<mono::index_buffer>  m_index_buffer;
 };
 
 }
