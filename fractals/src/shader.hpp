@@ -30,6 +30,7 @@ class shader {
     static auto make(std::string const& vertex_source, std::string const& fragment_source) -> local<shader>;
 
     // shader types
+    // https://www.khronos.org/opengl/wiki/OpenGL_Type
     enum class type : std::uint32_t {
         none = 0,
         // primitive types
