@@ -51,7 +51,8 @@ auto vertex_buffer::make(void const* data, std::uint32_t const& size, buffer_lay
     return make_local<vertex_buffer>(data, size, layout);
 }
 
-index_buffer::index_buffer(void const* data, std::uint32_t const& size) {
+index_buffer::index_buffer(void const* data, std::uint32_t const& size, std::int32_t const& count)
+    : m_count(count) {
     glGenBuffers(1, &m_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
@@ -61,8 +62,8 @@ index_buffer::~index_buffer() noexcept { glDeleteBuffers(1, &m_buffer); }
 auto index_buffer::bind() const -> void { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer); }
 auto index_buffer::unbind() const -> void { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
 
-auto index_buffer::make(void const* data, std::uint32_t const& size) -> local<index_buffer> {
-    return make_local<index_buffer>(data, size);
+auto index_buffer::make(void const* data, std::uint32_t const& size, std::int32_t const& count) -> local<index_buffer> {
+    return make_local<index_buffer>(data, size, count);
 }
 
 array_buffer::array_buffer() {

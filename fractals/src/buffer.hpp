@@ -129,17 +129,20 @@ class vertex_buffer {
 
 class index_buffer {
   public:
-    index_buffer(void const* data, std::uint32_t const& size);
+    index_buffer(void const* data, std::uint32_t const& size, std::int32_t const& count);
     ~index_buffer() noexcept;
 
     auto bind() const -> void;
     auto unbind() const -> void;
 
+    auto count() const -> std::int32_t { return m_count; }
+
   public:
-    static auto make(void const* data, std::uint32_t const& size) -> local<index_buffer>;
+    static auto make(void const* data, std::uint32_t const& size, std::int32_t const& count) -> local<index_buffer>;
 
   private:
     std::uint32_t m_buffer{};
+    std::int32_t  m_count;
 };
 
 class renderbuffer {

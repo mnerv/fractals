@@ -57,7 +57,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     };
 
     auto load_shader = []{
-        auto vertex_shader = "./shaders/410.shader.gl.vert";
+        auto vertex_shader   = "./shaders/410.shader.gl.vert";
         auto fragment_shader = "./shaders/410.conway.gl.frag";
         return mono::shader::make(mono::read_text(vertex_shader),
                                   mono::read_text(fragment_shader));
@@ -75,7 +75,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         {mono::shader::type::vec4, "a_color"},
         {mono::shader::type::vec2, "a_uv"},
     }));
-    array_buffer.set_index_buffer(mono::index_buffer::make(indices, sizeof(indices)));
+    array_buffer.set_index_buffer(mono::index_buffer::make(indices, sizeof(indices), sizeof(indices) / sizeof(std::uint32_t)));
 
     auto width  = window.buffer_width();
     auto height = window.buffer_height();
@@ -121,7 +121,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     float zoom_speed = 0.15f;
     float pan_speed  = 0.10f;
     glm::vec2 location{0.0, 0.0};
-    auto is_running = true;
+    auto is_running   = true;
     auto is_sim_pause = false;
 
     auto key_down = [&](mono::event const& event) {
@@ -203,8 +203,9 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             array_buffer.bind();
             array_buffer.vertex_buffer()->bind();
             array_buffer.index_buffer()->bind();
-            glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
+            glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
             buffer_a.unbind();
+            frame++;
         }
 
         // SECOND PASS - STORE LAST COMPUTATION
@@ -220,7 +221,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         array_buffer.bind();
         array_buffer.vertex_buffer()->bind();
         array_buffer.index_buffer()->bind();
-        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
         buffer_b.unbind();
 
         // OUTPUT TO SCREEN PASS
@@ -238,11 +239,10 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         array_buffer.bind();
         array_buffer.vertex_buffer()->bind();
         array_buffer.index_buffer()->bind();
-        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(std::uint32_t), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
 
         window.swap();
         window.poll();
-        frame++;
     }
 
     return 0;
