@@ -15,7 +15,7 @@ set(CMAKE_C_STANDARD 17)
 if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wconversion -Werror")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /wd4201")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /wd4201 /wd4189")
 endif()
 
 # source files and includes
@@ -29,11 +29,15 @@ target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/include
 target_link_libraries(${PROJECT_NAME}
     glfw
     glad
-    spdlog
+    spdlog::spdlog
     glm::glm_static
 )
 include_directories(${PROJECT_NAME}
     "${PROJECT_SOURCE_DIR}/include/mono"
+    glfw
+    glad
+    spdlog::spdlog
+    glm::glm_static
 )
 
 if (NOT WIN32)

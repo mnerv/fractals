@@ -15,7 +15,7 @@ set(CMAKE_C_STANDARD 17)
 if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wconversion -Werror")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /wd4201")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /wd4201 /wd4189")
 endif()
 
 # source files and includes
@@ -25,13 +25,40 @@ file(GLOB_RECURSE TARGET_SOURCE_FILES
 )
 add_executable(${PROJECT_NAME} ${TARGET_SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME}
-    spdlog
+    glfw
+    glad
+    spdlog::spdlog
+    glm::glm_static
     mono
 )
 include_directories(${PROJECT_NAME}
     "${PROJECT_SOURCE_DIR}/src"
+    glfw
+    glad
+    spdlog::spdlog
+    glm::glm_static
     mono
 )
+
+if (APPLE)
+    target_link_libraries(${PROJECT_NAME}
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework CoreVideo"
+        "-framework OpenGL"
+    )
+elseif (LINUX)
+    target_link_libraries(${PROJECT_NAME}
+        "-dl"
+        "-m"
+        "-GL"
+        "-X11"
+    )
+elseif(WIN32)
+    target_link_libraries(${PROJECT_NAME}
+        "OpenGL32.lib"
+    )
+endif()
 
 if (FRACTALS_RUN_TARGET)
     add_custom_target(run
