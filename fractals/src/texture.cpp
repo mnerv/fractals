@@ -28,7 +28,13 @@ texture::texture(mono::image const& image)
 texture::~texture() {
     glDeleteTextures(1, &m_buffer);
 }
-
+auto texture::set_image(mono::image const& image) -> void {
+    m_width = image.width();
+    m_height = image.height();
+    glBindTexture(GL_TEXTURE_2D, m_buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, image.buffer());
+}
 auto texture::resize(std::int32_t const& width, std::int32_t const& height) -> void {
     m_width  = width;
     m_height = height;

@@ -28,8 +28,14 @@ auto image::resize(std::int32_t const& width, std::int32_t const& height,
     m_buffer = new std::uint8_t[std::size_t(m_width * m_height * m_channels)];
 }
 
+auto image::get(std::int32_t const& x, std::int32_t const& y) const -> std::uint32_t {
+    auto const index = (y * m_channels) * m_width + (x * m_channels);
+    return std::uint32_t(m_buffer[index + 0]) << 16 |
+           std::uint32_t(m_buffer[index + 1]) <<  8 |
+           std::uint32_t(m_buffer[index + 2]) <<  0;
+}
 auto image::set(std::int32_t const& x, std::int32_t const& y, std::uint32_t const& color, std::uint8_t const& alpha) -> void {
-    auto index = (y * m_channels) * m_width + (x * m_channels);
+    auto const index = (y * m_channels) * m_width + (x * m_channels);
     m_buffer[index + 0] = (color >> 16) & 0xFF;
     m_buffer[index + 1] = (color >>  8) & 0xFF;
     m_buffer[index + 2] = (color >>  0) & 0xFF;
@@ -38,7 +44,7 @@ auto image::set(std::int32_t const& x, std::int32_t const& y, std::uint32_t cons
 auto image::set(std::int32_t const& x, std::int32_t const& y,
                 std::uint8_t const& red,  std::uint8_t const& green,
                 std::uint8_t const& blue, std::uint8_t const& alpha) -> void {
-    auto index = y * m_channels * m_width + (x * m_channels);
+    auto const index = y * m_channels * m_width + (x * m_channels);
     m_buffer[index + 0] = red;
     m_buffer[index + 1] = green;
     m_buffer[index + 2] = blue;

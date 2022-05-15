@@ -26,6 +26,7 @@ framebuffer::framebuffer(ref<mono::texture> const& texture, ref<mono::renderbuff
                            GL_TEXTURE_2D, texture->buffer(), 0);
     m_render->bind();
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, render->buffer());
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 framebuffer::~framebuffer() noexcept {
     glDeleteFramebuffers(1, &m_buffer);

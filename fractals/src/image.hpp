@@ -23,6 +23,7 @@ class image {
     auto width() const -> std::int32_t { return m_width; }
     auto height() const -> std::int32_t { return m_height; }
     auto channels() const -> std::int32_t { return m_channels; }
+    auto get(std::int32_t const& x, std::int32_t const& y) const -> std::uint32_t;
     auto set(std::int32_t const& x, std::int32_t const& y, std::uint32_t const& color, std::uint8_t const& alpha = 255) -> void;
     auto set(std::int32_t const& x, std::int32_t const& y,
              std::uint8_t const& red,  std::uint8_t const& green,
