@@ -6,8 +6,8 @@
  *
  * @copyright Copyright (c) 2022
  */
-#ifndef FRACTALS_MONO_HPP
-#define FRACTALS_MONO_HPP
+#ifndef MONO_MONO_HPP
+#define MONO_MONO_HPP
 
 #include <cstdint>
 #include <memory>
@@ -46,4 +46,4 @@ constexpr auto make_local(Args&&... args) -> local<T> {
 }
 }  // namespace mono
 
-#endif // FRACTALS_MONO_HPP
+#endif // MONO_MONO_HPP

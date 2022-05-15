@@ -7,11 +7,12 @@
  *
  * @copyright Copyright (c) 2022
  */
-#ifndef FRACTALS_BUFFER_HPP
-#define FRACTALS_BUFFER_HPP
+#ifndef MONO_BUFFER_HPP
+#define MONO_BUFFER_HPP
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "mono.hpp"
 #include "texture.hpp"
@@ -181,4 +182,4 @@ class array_buffer {
 
 }  // namespace mono
 
-#endif // FRACTALS_BUFFER_HPP
+#endif // MONO_BUFFER_HPP

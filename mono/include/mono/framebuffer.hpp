@@ -6,8 +6,8 @@
  *
  * @copyright Copyright (c) 2022
  */
-#ifndef FRACTALS_FRAMEBUFFER_HPP
-#define FRACTALS_FRAMEBUFFER_HPP
+#ifndef MONO_FRAMEBUFFER_HPP
+#define MONO_FRAMEBUFFER_HPP
 
 #include <cstdint>
 #include "mono.hpp"
@@ -36,4 +36,4 @@ class framebuffer {
 };
 }  // namespace mono
 
-#endif // FRACTALS_FRAMEBUFFER_HPP
+#endif // MONO_FRAMEBUFFER_HPP

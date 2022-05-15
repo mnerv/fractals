@@ -6,8 +6,8 @@
  *
  * @copyright Copyright (c) 2022
  */
-#ifndef FRACTALS_TEXTURE_HPP
-#define FRACTALS_TEXTURE_HPP
+#ifndef MONO_TEXTURE_HPP
+#define MONO_TEXTURE_HPP
 
 #include <cstdint>
 
@@ -37,4 +37,4 @@ class texture {
 };
 }  // namespace mono
 
-#endif // FRACTALS_TEXTURE_HPP
+#endif // MONO_TEXTURE_HPP

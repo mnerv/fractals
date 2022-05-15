@@ -8,6 +8,7 @@
  */
 #include "shader.hpp"
 
+#include "spdlog/spdlog.h"
 #include "glad/glad.h"
 
 namespace mono {

@@ -6,8 +6,8 @@
  *
  * @copyright Copyright (c) 2022
  */
-#ifndef FRACTALS_KEYBOARD_HPP
-#define FRACTALS_KEYBOARD_HPP
+#ifndef MONO_KEYBOARD_HPP
+#define MONO_KEYBOARD_HPP
 
 #include <cstdint>
 #include <type_traits>
@@ -168,5 +168,5 @@ inline constexpr auto operator!=(std::int32_t const& lhs, mono::key const& rhs) 
 
 }  // namespace mono
 
-#endif // FRACTALS_KEYBOARD_HPP
+#endif // MONO_KEYBOARD_HPP
 

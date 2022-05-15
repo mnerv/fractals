@@ -5,10 +5,7 @@ project(fractals)
 if (NOT DEFINED WORKSPACE_LOCATION)
     set(WORKSPACE_LOCATION ".")
 endif()
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${WORKSPACE_LOCATION}/bin")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${WORKSPACE_LOCATION}/lib")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${WORKSPACE_LOCATION}/lib")
 
 # compilation flags
 set(CMAKE_CXX_STANDARD 20)
@@ -27,44 +24,13 @@ file(GLOB_RECURSE TARGET_SOURCE_FILES
 )
 add_executable(${PROJECT_NAME} ${TARGET_SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME}
-    glfw
-    glad
     spdlog
-    glm::glm_static
+    mono
 )
 include_directories(${PROJECT_NAME}
     "${PROJECT_SOURCE_DIR}/src"
-    glfw
-    glad
-    spdlog
-    glm::glm_static
+    mono
 )
-
-if (NOT WIN32)
-    target_link_libraries(${PROJECT_NAME}
-        "-lpthread"
-    )
-endif()
-
-if (APPLE)
-    target_link_libraries(${PROJECT_NAME}
-        "-framework Cocoa"
-        "-framework IOKit"
-        "-framework CoreVideo"
-        "-framework OpenGL"
-    )
-elseif (LINUX)
-    target_link_libraries(${PROJECT_NAME}
-        "-dl"
-        "-m"
-        "-GL"
-        "-X11"
-    )
-elseif(WIN32)
-    target_link_libraries(${PROJECT_NAME}
-        "OpenGL32.lib"
-    )
-endif()
 
 if (FRACTALS_RUN_TARGET)
     add_custom_target(run

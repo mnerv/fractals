@@ -6,16 +6,13 @@
  *
  * @copyright Copyright (c) 2022
  */
-#ifndef FRACTALS_SHADER_HPP
-#define FRACTALS_SHADER_HPP
+#ifndef MONO_SHADER_HPP
+#define MONO_SHADER_HPP
 
 #include <cstdint>
 #include <string>
 
 #include "mono.hpp"
-
-#include "spdlog/spdlog.h"
-
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
@@ -85,4 +82,4 @@ class shader {
 };
 }  // namespace mono
 
-#endif // FRACTALS_SHADER_HPP
+#endif // MONO_SHADER_HPP

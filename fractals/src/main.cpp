@@ -15,13 +15,13 @@
 
 #include "spdlog/spdlog.h"
 
-#include "window.hpp"
-#include "shader.hpp"
-#include "buffer.hpp"
-#include "texture.hpp"
-#include "framebuffer.hpp"
-#include "event.hpp"
-#include "keyboard.hpp"
+#include "mono/window.hpp"
+#include "mono/shader.hpp"
+#include "mono/buffer.hpp"
+#include "mono/texture.hpp"
+#include "mono/framebuffer.hpp"
+#include "mono/event.hpp"
+#include "mono/keyboard.hpp"
 
 namespace nrv {
 struct vertex {
@@ -59,7 +59,7 @@ struct keystate {
 }
 
 auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[]) -> std::int32_t {
-    mono::window window{{"Fractals"}};
+    mono::window window{};
     window.set_position(window.xpos(), 200);
 
     nrv::vertex vertices[] {

@@ -16,5 +16,5 @@ add_subdirectory(deps/glm)
 add_subdirectory(deps/glfw)
 add_subdirectory(deps/glad)
 
+add_subdirectory(mono)
 add_subdirectory(fractals)
-

@@ -6,8 +6,8 @@
  *
  * @copyright Copyright (c) 2022
  */
-#ifndef FRACTALS_IMAGE_HPP
-#define FRACTALS_IMAGE_HPP
+#ifndef MONO_IMAGE_HPP
+#define MONO_IMAGE_HPP
 
 #include "mono.hpp"
 #include <cstdint>
@@ -39,4 +39,4 @@ class image {
 };
 }  // namespace mono
 
-#endif // FRACTALS_IMAGE_HPP
+#endif // MONO_IMAGE_HPP

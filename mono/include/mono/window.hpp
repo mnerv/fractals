@@ -6,8 +6,8 @@
  *
  * @copyright Copyright (c) 2022
  */
-#ifndef FRACTALS_WINDOW_HPP
-#define FRACTALS_WINDOW_HPP
+#ifndef MONO_WINDOW_HPP
+#define MONO_WINDOW_HPP
 
 #include <cstdint>
 #include <stdexcept>
@@ -111,4 +111,4 @@ class window {
 };
 }  // namespace mono
 
-#endif // FRACTALS_WINDOW_HPP
+#endif // MONO_WINDOW_HPP
