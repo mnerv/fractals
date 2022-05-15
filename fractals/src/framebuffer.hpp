@@ -23,6 +23,8 @@ class framebuffer {
 
     auto bind() const -> void;
     auto unbind() const -> void;
+    auto width()  const -> std::int32_t { return m_texture->width(); };
+    auto height() const -> std::int32_t { return m_texture->height(); };
 
     auto resize(std::int32_t const& width, std::int32_t const& height) -> void;
     auto texture() -> ref<mono::texture> { return m_texture; }

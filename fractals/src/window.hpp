@@ -17,8 +17,8 @@
 #include <type_traits>
 
 #include "mono.hpp"
-#include "input.hpp"
 #include "event.hpp"
+#include "keyboard.hpp"
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -34,8 +34,8 @@ struct window_props {
 
 class window {
   public:
-    using event_fn = std::function<void(event const&)>;
-    using event_callback_map = std::unordered_map<std::size_t, event_fn>;
+    using event_fn  = std::function<void(event const&)>;
+    using event_map = std::unordered_map<std::size_t, event_fn>;
 
   public:
     explicit window(window_props const& props = {});
@@ -55,13 +55,7 @@ class window {
     auto poll() -> void;
     auto time() const -> double { return glfwGetTime(); }
 
-    auto get_key(std::int32_t key) -> std::int32_t {
-        return glfwGetKey(m_window, key);
-    }
-    auto make_key(std::int32_t const& key) -> ref<state::key> {
-        m_keys.push_back(state::key::make(key));
-        return m_keys.back();
-    }
+    auto get_key(mono::key const& key) -> mono::keystate;
 
     // TODO: Add type constraints and maybe if possible have it so the lambda can have the inherit parameter type
     template <typename Callable>
@@ -73,7 +67,6 @@ class window {
         } else {
             m_data.events[type].insert({id, func});
         }
-
     }
     template <typename Callable>
     auto remove_event_listener(event_type const& type, [[maybe_unused]]Callable const& func) -> void {
@@ -96,7 +89,6 @@ class window {
 
   private:
     GLFWwindow* m_window{nullptr};
-    std::vector<ref<state::key>> m_keys{};
 
     struct data {
         std::string  title;
@@ -107,7 +99,7 @@ class window {
         std::int32_t xpos;
         std::int32_t ypos;
 
-        std::unordered_map<event_type, event_callback_map> events;
+        std::unordered_map<event_type, event_map> events;
     };
     data m_data{};
 

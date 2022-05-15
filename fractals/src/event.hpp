@@ -12,7 +12,10 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <type_traits>
+
 #include "mono.hpp"
+#include "keyboard.hpp"
 
 namespace mono {
 enum class event_category : std::uint8_t {
@@ -275,9 +278,9 @@ class mouse_release_event : public event {
 
 class mouse_wheel_event : public event {
   public:
-    mouse_wheel_event(mono::f64 const& deltax, mono::f64 const& deltay)
+    mouse_wheel_event(mono::f64 const& dx, mono::f64 const& dy)
         : event(event_type::mouse_wheel, event_category::mouse),
-          m_delta_x(deltax), m_delta_y(deltay) {}
+          m_dx(dx), m_dy(dy) {}
     ~mouse_wheel_event() = default;
 
     auto name() const -> std::string override {
@@ -286,17 +289,17 @@ class mouse_wheel_event : public event {
     auto str() const -> std::string override {
         using namespace std::string_literals;
         std::string str{name() + " { "};
-        str += " delta_x: "  + std::to_string(m_delta_x)  + ",";
-        str += " delta_y: " + std::to_string(m_delta_y) + " }";
+        str += "dx: "  + std::to_string(m_dx)  + ", ";
+        str += "dy: " + std::to_string(m_dy) + " }";
         return str;
     }
 
-    auto delta_x() -> mono::f64 { return m_delta_x; }
-    auto delta_y() -> mono::f64 { return m_delta_y; }
+    auto dx() -> mono::f64 { return m_dx; }
+    auto dy() -> mono::f64 { return m_dy; }
 
   private:
-    mono::f64 m_delta_x;
-    mono::f64 m_delta_y;
+    mono::f64 m_dx;
+    mono::f64 m_dy;
 };
 
 class key_down_event : public event {

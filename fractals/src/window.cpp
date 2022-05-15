@@ -193,9 +193,12 @@ window::~window() {
 
 auto window::swap() -> void { glfwSwapBuffers(m_window); }
 auto window::poll() -> void {
-    std::for_each(std::begin(m_keys), std::end(m_keys), [&](auto& key){
-        key->update(glfwGetKey(m_window, key->value));
-    });
     glfwPollEvents();
+}
+
+auto window::get_key(mono::key const& key) -> mono::keystate {
+    using T = std::underlying_type_t<mono::key>;
+    auto const current_state = glfwGetKey(m_window, static_cast<T>(key));
+    return static_cast<mono::keystate>(current_state);
 }
 }

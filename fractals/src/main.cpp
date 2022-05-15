@@ -21,8 +21,9 @@
 #include "texture.hpp"
 #include "framebuffer.hpp"
 #include "event.hpp"
+#include "keyboard.hpp"
 
-namespace mono {
+namespace nrv {
 struct vertex {
     glm::vec3 position;
     glm::vec4 color;
@@ -37,6 +38,24 @@ auto read_text(std::string const& filename) -> std::string {
         std::istreambuf_iterator<char>()
     };
 }
+
+struct keystate {
+    mono::key key;
+    bool states[2]{false, false};
+
+    keystate(mono::key k) : key{k} {}
+    auto update(bool const& state) -> void {
+        states[1] = states[0];
+        states[0] = state;
+    }
+    inline auto press() const -> bool { return states[0]; }
+    inline auto release() const -> bool { return states[0]; }
+    inline auto click() const -> bool {return states[0] && !states[1]; }
+
+    inline static auto make(mono::key k) -> mono::ref<keystate> {
+        return mono::make_ref<keystate>(k);
+    }
+};
 }
 
 auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[]) -> std::int32_t {
@@ -45,7 +64,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     }};
     //window.set_position(window.xpos(), 200);
 
-    mono::vertex vertices[]{
+    nrv::vertex vertices[]{
         {{-1.0f,  1.0f,  0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
         {{ 1.0f,  1.0f,  0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
         {{ 1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
@@ -59,15 +78,15 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     auto load_shader = []{
         auto vertex_shader   = "./shaders/410.shader.gl.vert";
         auto fragment_shader = "./shaders/410.conway.gl.frag";
-        return mono::shader::make(mono::read_text(vertex_shader),
-                                  mono::read_text(fragment_shader));
+        return mono::shader::make(nrv::read_text(vertex_shader),
+                                  nrv::read_text(fragment_shader));
     };
 
     auto shader = load_shader();
-    auto render_shader = mono::shader::make(mono::read_text("./shaders/410.shader.gl.vert"),
-                                            mono::read_text("./shaders/410.render.gl.frag"));
-    auto post_shader = mono::shader::make(mono::read_text("./shaders/410.shader.gl.vert"),
-                                          mono::read_text("./shaders/410.post.gl.frag"));
+    auto render_shader = mono::shader::make(nrv::read_text("./shaders/410.shader.gl.vert"),
+                                            nrv::read_text("./shaders/410.render.gl.frag"));
+    auto post_shader = mono::shader::make(nrv::read_text("./shaders/410.shader.gl.vert"),
+                                          nrv::read_text("./shaders/410.post.gl.frag"));
 
     mono::array_buffer array_buffer{};
     array_buffer.add_vertex_buffer(mono::vertex_buffer::make(vertices, sizeof(vertices), {
@@ -83,7 +102,6 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     mono::framebuffer buffer_a{width, height};
     mono::framebuffer buffer_b{width, height};
 
-    auto reload_key = window.make_key(GLFW_KEY_R);
     std::uint32_t frame = 0;
 
     std::random_device rdev;
@@ -105,108 +123,72 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glGenerateMipmap(GL_TEXTURE_2D);
 
+    std::vector<mono::ref<nrv::keystate>> keys;
+    auto update_keystates = [&] {
+        std::for_each(std::begin(keys), std::end(keys), [&](auto& keystate) {
+            keystate->update(window.get_key(keystate->key) == mono::keystate::PRESS);
+            if (keystate->key == mono::key::SPACE) {
+                spdlog::info("space key");
+            }
+        });
+    };
+    auto make_keystate = [&](mono::key const& key) {
+        auto ks = nrv::keystate::make(key);
+        keys.push_back(ks);
+        return ks;
+    };
+
     auto current_time = window.time();
     auto last_time    = current_time;
-    auto delta_time   = current_time - last_time;
+    [[maybe_unused]]auto delta_time   = current_time - last_time;
 
-    auto zoom_in    = window.make_key(GLFW_KEY_F);
-    auto zoom_out   = window.make_key(GLFW_KEY_G);
-
-    auto left_key   = window.make_key(GLFW_KEY_A);
-    auto right_key  = window.make_key(GLFW_KEY_D);
-    auto up_key     = window.make_key(GLFW_KEY_W);
-    auto down_key   = window.make_key(GLFW_KEY_S);
-
-    float zoom       = 1.0f;
+    float pan_speed  = 0.15f;
     float zoom_speed = 0.15f;
-    float pan_speed  = 0.10f;
+
+    float zoom_dv = 0.0f;
+    float zoom    = 1.0f;
+    glm::vec2 velocity{0.0, 0.0};
     glm::vec2 location{0.0, 0.0};
     auto is_running   = true;
     auto is_sim_pause = false;
 
-    auto key_down = [&](mono::event const& event) {
-        auto e = static_cast<mono::key_down_event const&>(event);
-        if (e.key() == GLFW_KEY_Q)
-            is_running = false;
-        if (e.key() == GLFW_KEY_SPACE)
-            is_sim_pause = true;
-    };
-    auto key_up = [&](mono::event const& event) {
-        auto e = static_cast<mono::key_up_event const&>(event);
-        if (e.key() == GLFW_KEY_SPACE)
-            is_sim_pause = false;
-    };
-    window.add_event_listener(mono::event_type::key_down, key_down);
-    window.add_event_listener(mono::event_type::key_up, key_up);
+    auto move_left  = make_keystate(mono::key::A);
+    auto move_right = make_keystate(mono::key::D);
+    auto move_up    = make_keystate(mono::key::W);
+    auto move_down  = make_keystate(mono::key::S);
+    auto move_reset = make_keystate(mono::key::C);
 
-    while (is_running) {
-        last_time    = current_time;
-        current_time = window.time();
-        delta_time   = current_time - last_time;
+    auto zoom_reset = make_keystate(mono::key::N0);
+    auto zoom_in    = make_keystate(mono::key::F);
+    auto zoom_out   = make_keystate(mono::key::G);
 
-        is_running = !window.shouldclose();
-        width  = window.buffer_width();
-        height = window.buffer_height();
+    auto play_pause = make_keystate(mono::key::SPACE);
+    auto step_sim   = make_keystate(mono::key::M);
 
-        using namespace mono::state;
-        if (key::is_clicked(reload_key)) {
-            spdlog::info("reload shader");
+    auto simulate = [&] {
+        buffer_a.resize(width, height);
+        buffer_a.bind();
 
-            noise_image.resize(width, height);
-            generate_noise();
-            noise_texture = mono::make_ref<mono::texture>(noise_image);
-            glGenerateMipmap(GL_TEXTURE_2D);
-            try {
-                shader = load_shader();
-            } catch (std::runtime_error const& e) {
-                spdlog::error(e.what());
-            }
-            frame = 0;
-        }
-        if (key::is_press(zoom_in)) {
-            zoom -= zoom_speed * float(delta_time);
-        }
-        if (key::is_press(zoom_out)) {
-            zoom += zoom_speed * float(delta_time);
-        }
-        if (key::is_press(right_key)) {
-            location.x += pan_speed * float(delta_time);
-        } else if (key::is_press(left_key)) {
-            location.x -= pan_speed * float(delta_time);
-        }
+        glViewport(0, 0, width, height);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-        if (key::is_press(up_key)) {
-            location.y += pan_speed * float(delta_time);
-        } else if (key::is_press(down_key)) {
-            location.y -= pan_speed * float(delta_time);
-        }
+        shader->bind();
+        shader->num("u_time", float(window.time()));
+        shader->vec2("u_res", {width, height});
+        shader->num("u_frame", frame);
+        shader->num("u_texture", 0);
+        noise_texture->bind(0);
 
-        // FIRST PASS
-        if (!is_sim_pause) {
-            buffer_a.resize(width, height);
-            buffer_a.bind();
+        shader->num("u_texture1", 1);
+        buffer_b.texture()->bind(1);
 
-            glViewport(0, 0, width, height);
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            shader->bind();
-            shader->num("u_time", float(window.time()));
-            shader->vec2("u_res", {width, height});
-            shader->num("u_frame", frame);
-            shader->num("u_texture", 0);
-            noise_texture->bind(0);
-
-            shader->num("u_texture1", 1);
-            buffer_b.texture()->bind(1);
-
-            array_buffer.bind();
-            array_buffer.vertex_buffer()->bind();
-            array_buffer.index_buffer()->bind();
-            glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
-            buffer_a.unbind();
-            frame++;
-        }
+        array_buffer.bind();
+        array_buffer.vertex_buffer()->bind();
+        array_buffer.index_buffer()->bind();
+        glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
+        buffer_a.unbind();
+        frame++;
 
         // SECOND PASS - STORE LAST COMPUTATION
         buffer_b.resize(width, height);
@@ -223,6 +205,88 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         array_buffer.index_buffer()->bind();
         glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
         buffer_b.unbind();
+    };
+
+    auto key_down = [&](mono::event const& event) {
+        auto e = static_cast<mono::key_down_event const&>(event);
+        if (e.key() == mono::key::Q)
+            is_running = false;
+    };
+    auto key_up = [&](mono::event const& event) {
+        auto e = static_cast<mono::key_up_event const&>(event);
+        if (e.key() == mono::key::R) {
+            spdlog::info("reload shader");
+
+            noise_image.resize(width, height);
+            generate_noise();
+            noise_texture = mono::make_ref<mono::texture>(noise_image);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            try {
+                shader = load_shader();
+            } catch (std::runtime_error const& e) {
+                spdlog::error(e.what());
+            }
+            frame = 0;
+            simulate();
+        }
+    };
+    auto mouse_event = [&](mono::event const& event) {
+        spdlog::info(event.str());
+    };
+    window.add_event_listener(mono::event_type::key_down, key_down);
+    window.add_event_listener(mono::event_type::key_up, key_up);
+    window.add_event_listener(mono::event_type::mouse_move, mouse_event);
+    window.add_event_listener(mono::event_type::mouse_wheel, mouse_event);
+
+    while (is_running) {
+        last_time    = current_time;
+        current_time = window.time();
+        delta_time   = current_time - last_time;
+
+        is_running = !window.shouldclose();
+        width  = window.buffer_width();
+        height = window.buffer_height();
+        update_keystates();
+
+        // handle input
+        if (move_left->press())
+            velocity.x = -pan_speed;
+        else if (move_right->press())
+            velocity.x = pan_speed;
+        else
+            velocity.x = 0.0f;
+
+        if (move_up->press())
+            velocity.y = pan_speed;
+        else if (move_down->press())
+            velocity.y = -pan_speed;
+        else
+            velocity.y = 0.0f;
+
+        if (zoom_in->press())
+            zoom_dv = -zoom_speed;
+        else if (zoom_out->press())
+            zoom_dv = zoom_speed;
+        else
+            zoom_dv = 0.0f;
+
+        if (zoom_reset->click())
+            zoom = 1.0f;
+        if (move_reset->click())
+            location = {0.0f, 0.0f};
+
+        if (play_pause->click())
+            is_sim_pause = !is_sim_pause;
+        if (step_sim->click())
+            simulate();
+
+        // update movement
+        location += velocity * mono::f32(delta_time);
+        zoom += zoom_dv * mono::f32(delta_time);
+
+        // FIRST PASS
+        if (!is_sim_pause)
+            simulate();
 
         // OUTPUT TO SCREEN PASS
         glViewport(0, 0, width, height);
