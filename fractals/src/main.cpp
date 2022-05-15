@@ -48,12 +48,12 @@ struct keystate {
         states[1] = states[0];
         states[0] = state;
     }
-    inline auto press() const -> bool { return states[0]; }
-    inline auto release() const -> bool { return states[0]; }
+    inline auto press() const -> bool {return states[0]; }
+    inline auto release() const -> bool { return !states[1]; }
     inline auto click() const -> bool {return states[0] && !states[1]; }
 
-    inline static auto make(mono::key k) -> mono::ref<keystate> {
-        return mono::make_ref<keystate>(k);
+    inline static auto make(mono::key k) -> mono::local<keystate> {
+        return mono::make_local<keystate>(k);
     }
 };
 }
@@ -62,31 +62,35 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     mono::window window{{
         "Fractals",
     }};
-    //window.set_position(window.xpos(), 200);
+    window.set_position(window.xpos(), 200);
 
-    nrv::vertex vertices[]{
+    nrv::vertex vertices[] {
         {{-1.0f,  1.0f,  0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
         {{ 1.0f,  1.0f,  0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
         {{ 1.0f, -1.0f,  0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
         {{-1.0f, -1.0f,  0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
     };
-    std::uint32_t indices[]{
+    std::uint32_t indices[] {
         0, 1, 2,
         0, 2, 3
     };
 
-    auto load_shader = []{
+    auto load_shader = [] {
         auto vertex_shader   = "./shaders/410.shader.gl.vert";
         auto fragment_shader = "./shaders/410.conway.gl.frag";
         return mono::shader::make(nrv::read_text(vertex_shader),
                                   nrv::read_text(fragment_shader));
     };
 
-    auto shader = load_shader();
-    auto render_shader = mono::shader::make(nrv::read_text("./shaders/410.shader.gl.vert"),
-                                            nrv::read_text("./shaders/410.render.gl.frag"));
-    auto post_shader = mono::shader::make(nrv::read_text("./shaders/410.shader.gl.vert"),
-                                          nrv::read_text("./shaders/410.post.gl.frag"));
+    auto shader = mono::shader::make(
+        nrv::read_text("./shaders/410.shader.gl.vert"),
+        nrv::read_text("./shaders/410.conway_post.gl.frag")
+    );
+    auto conway_shader  = load_shader();
+    auto texture_shader = mono::shader::make(
+        nrv::read_text("./shaders/410.shader.gl.vert"),
+        nrv::read_text("./shaders/410.texture.gl.frag")
+    );
 
     mono::array_buffer array_buffer{};
     array_buffer.add_vertex_buffer(mono::vertex_buffer::make(vertices, sizeof(vertices), {
@@ -106,13 +110,13 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
 
     std::random_device rdev;
     std::mt19937 rng{rdev()};  // pass rdev into as seed
-    std::uniform_int_distribution<std::mt19937::result_type> dist(0, 255);
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0, 1);
 
     mono::image noise_image{width, height};
     auto generate_noise = [&] {
         for (auto i = 0; i < noise_image.height(); i++) {
             for (auto j = 0; j < noise_image.width(); j++) {
-                auto data = std::uint8_t (dist(rng));
+                auto data = std::uint8_t(dist(rng) * 255);
                 noise_image.set(j, i, data, data, data);
             }
         }
@@ -123,24 +127,20 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    std::vector<mono::ref<nrv::keystate>> keys;
+    std::vector<mono::ref<nrv::keystate>> keys{};
     auto update_keystates = [&] {
         std::for_each(std::begin(keys), std::end(keys), [&](auto& keystate) {
             keystate->update(window.get_key(keystate->key) == mono::keystate::PRESS);
-            if (keystate->key == mono::key::SPACE) {
-                spdlog::info("space key");
-            }
         });
     };
     auto make_keystate = [&](mono::key const& key) {
-        auto ks = nrv::keystate::make(key);
-        keys.push_back(ks);
-        return ks;
+        keys.emplace_back(nrv::keystate::make(key));
+        return keys.back();
     };
 
     auto current_time = window.time();
     auto last_time    = current_time;
-    [[maybe_unused]]auto delta_time   = current_time - last_time;
+    auto delta_time   = current_time - last_time;
 
     float pan_speed  = 0.15f;
     float zoom_speed = 0.15f;
@@ -150,7 +150,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     glm::vec2 velocity{0.0, 0.0};
     glm::vec2 location{0.0, 0.0};
     auto is_running   = true;
-    auto is_sim_pause = false;
+    auto is_sim_pause = true;
 
     auto move_left  = make_keystate(mono::key::A);
     auto move_right = make_keystate(mono::key::D);
@@ -166,6 +166,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     auto step_sim   = make_keystate(mono::key::M);
 
     auto simulate = [&] {
+        // FIRST PASS - Conway's Game of Life
         buffer_a.resize(width, height);
         buffer_a.bind();
 
@@ -173,14 +174,14 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        shader->bind();
-        shader->num("u_time", float(window.time()));
-        shader->vec2("u_res", {width, height});
-        shader->num("u_frame", frame);
-        shader->num("u_texture", 0);
+        conway_shader->bind();
+        conway_shader->num("u_time", float(window.time()));
+        conway_shader->vec2("u_res", {width, height});
+        conway_shader->num("u_frame", frame);
+        conway_shader->num("u_texture", 0);
         noise_texture->bind(0);
 
-        shader->num("u_texture1", 1);
+        conway_shader->num("u_texture1", 1);
         buffer_b.texture()->bind(1);
 
         array_buffer.bind();
@@ -188,7 +189,6 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         array_buffer.index_buffer()->bind();
         glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
         buffer_a.unbind();
-        frame++;
 
         // SECOND PASS - STORE LAST COMPUTATION
         buffer_b.resize(width, height);
@@ -196,8 +196,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        render_shader->bind();
-        render_shader->num("u_texture", 0);
+        texture_shader->bind();
+        texture_shader->num("u_texture", 0);
         buffer_a.texture()->bind(0);
 
         array_buffer.bind();
@@ -205,7 +205,9 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         array_buffer.index_buffer()->bind();
         glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
         buffer_b.unbind();
+        frame++;
     };
+    simulate(); // run once to initialize buffers
 
     auto key_down = [&](mono::event const& event) {
         auto e = static_cast<mono::key_down_event const&>(event);
@@ -222,7 +224,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             noise_texture = mono::make_ref<mono::texture>(noise_image);
             glGenerateMipmap(GL_TEXTURE_2D);
             try {
-                shader = load_shader();
+                conway_shader = load_shader();
             } catch (std::runtime_error const& e) {
                 spdlog::error(e.what());
             }
@@ -293,11 +295,11 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        post_shader->bind();
-        post_shader->vec2("u_res", {width, height});
-        post_shader->vec2("u_location", location);
-        post_shader->num("u_zoom", zoom);
-        post_shader->num("u_texture", 0);
+        shader->bind();
+        shader->vec2("u_res", {width, height});
+        shader->vec2("u_location", location);
+        shader->num("u_zoom", zoom);
+        shader->num("u_texture", 0);
         buffer_b.texture()->bind(0);
 
         array_buffer.bind();

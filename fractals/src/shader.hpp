@@ -28,6 +28,7 @@ namespace mono {
 class shader {
   public:
     static auto make(std::string const& vertex_source, std::string const& fragment_source) -> local<shader>;
+    static auto make() -> local<shader>;
 
     // shader types
     // https://www.khronos.org/opengl/wiki/OpenGL_Type
