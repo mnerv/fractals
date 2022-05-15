@@ -142,4 +142,4 @@ auto shader::link(std::uint32_t const& fs, std::uint32_t const& vs) -> std::uint
 auto shader::uniform_location(std::string const& name) const -> std::int32_t {
     return glGetUniformLocation(m_id, name.c_str());
 }
-}
+}  // namespace mono

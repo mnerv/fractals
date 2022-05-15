@@ -179,6 +179,6 @@ class array_buffer {
     ref<mono::index_buffer>  m_index_buffer;
 };
 
-}
+}  // namespace mono
 
-#endif //FRACTALS_BUFFER_HPP
+#endif // FRACTALS_BUFFER_HPP

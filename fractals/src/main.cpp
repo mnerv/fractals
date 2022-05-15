@@ -37,7 +37,7 @@ auto read_text(std::string const& filename) -> std::string {
         std::istreambuf_iterator<char>(input),
         std::istreambuf_iterator<char>()
     };
-}
+}  // namespace nrv
 
 struct keystate {
     mono::key key;
@@ -59,9 +59,7 @@ struct keystate {
 }
 
 auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[]) -> std::int32_t {
-    mono::window window{{
-        "Fractals",
-    }};
+    mono::window window{{"Fractals"}};
     window.set_position(window.xpos(), 200);
 
     nrv::vertex vertices[] {
@@ -103,8 +101,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     auto width  = window.buffer_width();
     auto height = window.buffer_height();
 
-    mono::framebuffer buffer_a{width, height};
-    mono::framebuffer buffer_b{width, height};
+    auto buffer_a = mono::make_local<mono::framebuffer>(width, height);
+    auto buffer_b = mono::make_local<mono::framebuffer>(width, height);
 
     std::uint32_t frame = 0;
 
@@ -167,8 +165,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
 
     auto simulate = [&] {
         // FIRST PASS - Conway's Game of Life
-        buffer_a.resize(width, height);
-        buffer_a.bind();
+        buffer_a->resize(width, height);
+        buffer_a->bind();
 
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -182,29 +180,29 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         noise_texture->bind(0);
 
         conway_shader->num("u_texture1", 1);
-        buffer_b.texture()->bind(1);
+        buffer_b->texture()->bind(1);
 
         array_buffer.bind();
         array_buffer.vertex_buffer()->bind();
         array_buffer.index_buffer()->bind();
         glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
-        buffer_a.unbind();
+        buffer_a->unbind();
 
         // SECOND PASS - STORE LAST COMPUTATION
-        buffer_b.resize(width, height);
-        buffer_b.bind();
+        buffer_b->resize(width, height);
+        buffer_b->bind();
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         texture_shader->bind();
         texture_shader->num("u_texture", 0);
-        buffer_a.texture()->bind(0);
+        buffer_a->texture()->bind(0);
 
         array_buffer.bind();
         array_buffer.vertex_buffer()->bind();
         array_buffer.index_buffer()->bind();
         glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
-        buffer_b.unbind();
+        buffer_b->unbind();
         frame++;
     };
     simulate(); // run once to initialize buffers
@@ -232,13 +230,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             simulate();
         }
     };
-    auto mouse_event = [&](mono::event const& event) {
-        spdlog::info(event.str());
-    };
     window.add_event_listener(mono::event_type::key_down, key_down);
     window.add_event_listener(mono::event_type::key_up, key_up);
-    window.add_event_listener(mono::event_type::mouse_move, mouse_event);
-    window.add_event_listener(mono::event_type::mouse_wheel, mouse_event);
 
     while (is_running) {
         last_time    = current_time;
@@ -300,7 +293,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         shader->vec2("u_location", location);
         shader->num("u_zoom", zoom);
         shader->num("u_texture", 0);
-        buffer_b.texture()->bind(0);
+        buffer_b->texture()->bind(0);
 
         array_buffer.bind();
         array_buffer.vertex_buffer()->bind();

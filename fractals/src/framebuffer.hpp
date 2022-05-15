@@ -34,6 +34,6 @@ class framebuffer {
     ref<mono::texture>      m_texture{nullptr};
     ref<mono::renderbuffer> m_render{nullptr};
 };
-}
+}  // namespace mono
 
-#endif //FRACTALS_FRAMEBUFFER_HPP
+#endif // FRACTALS_FRAMEBUFFER_HPP

@@ -1,7 +1,7 @@
 /**
  * @file   window.cpp
  * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
- * @brief  Window abstraction layer for GLFW.
+ * @brief  Window implementation acts as a wrapper for GLFW window.
  * @date   2022-05-03
  *
  * @copyright Copyright (c) 2022
@@ -43,6 +43,7 @@ window::window(const window_props &props) {
 
     // Register events
     glfwSetWindowUserPointer(m_window, &m_data);
+    // TODO: Better event systems, right now this calls the event handler for each event.
     glfwSetWindowSizeCallback(m_window,
     [](GLFWwindow* window, std::int32_t width, std::int32_t height) {
         auto data = mono::window::user_ptr(window);
@@ -87,7 +88,7 @@ window::window(const window_props &props) {
     });
     glfwSetCursorPosCallback(m_window,
     [](GLFWwindow* window, mono::f64 xpos, mono::f64 ypos) {
-        auto data = static_cast<window::data*>(glfwGetWindowUserPointer(window));
+        auto data = mono::window::user_ptr(window);
 
         auto it = data->events.find(event_type::mouse_move);
         if (it == data->events.end()) return;
@@ -97,10 +98,35 @@ window::window(const window_props &props) {
             fn.second(event);
         });
     });
+    glfwSetCursorEnterCallback(m_window, [](GLFWwindow* window, std::int32_t entered) {
+       auto data = mono::window::user_ptr(window);
+        mono::f64 pos_x, pos_y;
+        glfwGetCursorPos(window, &pos_x, &pos_y);
+
+        if (entered) {
+            auto it = data->events.find(event_type::mouse_enter);
+            if (it == data->events.end()) return;
+            auto fns = it->second;
+
+            auto event = mouse_enter_event(pos_x, pos_y);
+            std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
+                fn.second(event);
+            });
+        } else {
+            auto it = data->events.find(event_type::mouse_leave);
+            if (it == data->events.end()) return;
+            auto fns = it->second;
+
+            auto event = mouse_leave_event(pos_x, pos_y);
+            std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
+                fn.second(event);
+            });
+        }
+    });
     glfwSetMouseButtonCallback(m_window,
     [](GLFWwindow* window, std::int32_t button, std::int32_t action, std::int32_t mods) {
-        auto data = static_cast<window::data*>(glfwGetWindowUserPointer(window));
-        double pos_x, pos_y;
+        auto data = mono::window::user_ptr(window);
+        mono::f64 pos_x, pos_y;
         glfwGetCursorPos(window, &pos_x, &pos_y);
 
         if (action == GLFW_PRESS) {
@@ -124,9 +150,8 @@ window::window(const window_props &props) {
         }
     });
     glfwSetScrollCallback(m_window,
-    [](GLFWwindow* window, double xoffset, double yoffset){
-        auto data = static_cast<window::data*>(glfwGetWindowUserPointer(window));
-
+    [](GLFWwindow* window, f64 xoffset, f64 yoffset){
+        auto data = mono::window::user_ptr(window);
         auto it = data->events.find(event_type::mouse_wheel);
         if (it == data->events.end()) return;
         auto fns = it->second;
@@ -160,7 +185,7 @@ window::window(const window_props &props) {
     });
     glfwSetCharCallback(m_window,
     [](GLFWwindow* window, unsigned int codepoint) {
-        auto data = static_cast<window::data*>(glfwGetWindowUserPointer(window));
+        auto data = mono::window::user_ptr(window);
         auto it = data->events.find(event_type::key_typed);
         if (it == data->events.end()) return;
         auto fns = it->second;
@@ -201,4 +226,4 @@ auto window::get_key(mono::key const& key) -> mono::keystate {
     auto const current_state = glfwGetKey(m_window, static_cast<T>(key));
     return static_cast<mono::keystate>(current_state);
 }
-}
+}  // namespace mono

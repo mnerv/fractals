@@ -42,5 +42,5 @@ auto texture::bind(std::uint32_t const& id) const -> void {
 }
 auto texture::unbind() const -> void { glBindTexture(GL_TEXTURE_2D, 0); }
 
-}
+}  // namespace mono
 

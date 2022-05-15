@@ -40,5 +40,5 @@ auto framebuffer::bind() const -> void {
     glBindFramebuffer(GL_FRAMEBUFFER, m_buffer);
 }
 auto framebuffer::unbind() const -> void { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
-}
+}  // namespace mono
 

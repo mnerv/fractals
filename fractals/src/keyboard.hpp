@@ -166,7 +166,7 @@ inline constexpr auto operator!=(std::int32_t const& lhs, mono::key const& rhs) 
     return !(rhs == lhs);
 }
 
-} // namespace mono
+}  // namespace mono
 
-#endif //FRACTALS_KEYBOARD_HPP
+#endif // FRACTALS_KEYBOARD_HPP
 

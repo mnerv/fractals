@@ -15,6 +15,7 @@
 #include <vector>
 #include <unordered_map>
 #include <type_traits>
+#include <functional>
 
 #include "mono.hpp"
 #include "event.hpp"
@@ -25,7 +26,7 @@
 
 namespace mono {
 struct window_props {
-    std::string  title  = "no title";
+    std::string  title  = "mono::window";
     std::int32_t width  = 738;
     std::int32_t height = 480;
     std::int32_t xpos{INT32_MIN};
@@ -108,6 +109,6 @@ class window {
         return static_cast<window::data*>(glfwGetWindowUserPointer(window));
     }
 };
-}
+}  // namespace mono
 
-#endif //FRACTALS_WINDOW_HPP
+#endif // FRACTALS_WINDOW_HPP

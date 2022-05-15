@@ -32,6 +32,7 @@ enum class event_type : std::uint32_t {
     drop,
     window_resize, window_move, window_focus,
     buffer_resize,
+    mouse_enter,   mouse_leave,
     mouse_move,    mouse_press, mouse_release, mouse_wheel,
     key_down,      key_up,      key_typed
 };
@@ -302,6 +303,58 @@ class mouse_wheel_event : public event {
     mono::f64 m_dy;
 };
 
+class mouse_enter_event : public event {
+  public:
+    mouse_enter_event(mono::f64 const& x, mono::f64 const& y)
+        : event(event_type::mouse_enter, event_category::mouse),
+          m_x(x), m_y(y) {}
+    ~mouse_enter_event() = default;
+
+    auto name() const -> std::string override {
+        return "mouse_enter_event";
+    }
+    auto str() const -> std::string override {
+        using namespace std::string_literals;
+        std::string str{name() + " { "};
+        str += "x: " + std::to_string(m_x) + ", ";
+        str += "y: " + std::to_string(m_y) + " }";
+        return str;
+    }
+
+    auto x() -> mono::f64 { return m_x; }
+    auto y() -> mono::f64 { return m_y; }
+
+  private:
+    mono::f64 m_x;
+    mono::f64 m_y;
+};
+
+class mouse_leave_event : public event {
+  public:
+    mouse_leave_event(mono::f64 const& x, mono::f64 const& y)
+        : event(event_type::mouse_leave, event_category::mouse),
+          m_x(x), m_y(y) {}
+    ~mouse_leave_event() = default;
+
+    auto name() const -> std::string override {
+        return "mouse_leave_event";
+    }
+    auto str() const -> std::string override {
+        using namespace std::string_literals;
+        std::string str{name() + " { "};
+        str += "x: " + std::to_string(m_x) + ", ";
+        str += "y: " + std::to_string(m_y) + " }";
+        return str;
+    }
+
+    auto x() -> mono::f64 { return m_x; }
+    auto y() -> mono::f64 { return m_y; }
+
+  private:
+    mono::f64 m_x;
+    mono::f64 m_y;
+};
+
 class key_down_event : public event {
   public:
     key_down_event(std::int32_t const& key,
@@ -391,7 +444,7 @@ class key_typed_event : public event {
     std::uint32_t m_code_point;
 };
 
-}
+}  // namespace mono
 
-#endif //FRACTALS_EVENT_HPP
+#endif // FRACTALS_EVENT_HPP
 

@@ -34,6 +34,6 @@ class texture {
     std::int32_t  m_width;
     std::int32_t  m_height;
 };
-}
+}  // namespace mono
 
-#endif //FRACTALS_TEXTURE_HPP
+#endif // FRACTALS_TEXTURE_HPP

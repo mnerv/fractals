@@ -44,6 +44,6 @@ template <typename T, typename... Args>
 constexpr auto make_local(Args&&... args) -> local<T> {
     return std::make_unique<T>(std::forward<Args>(args)...);
 }
-}
+}  // namespace mono
 
-#endif //FRACTALS_MONO_HPP
+#endif // FRACTALS_MONO_HPP

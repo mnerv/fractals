@@ -83,6 +83,6 @@ class shader {
   private:
     std::uint32_t m_id;
 };
-}
+}  // namespace mono
 
-#endif //FRACTALS_SHADER_HPP
+#endif // FRACTALS_SHADER_HPP

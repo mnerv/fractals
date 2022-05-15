@@ -124,5 +124,5 @@ auto renderbuffer::resize(std::int32_t const& width, std::int32_t const& height)
 auto renderbuffer::bind() const -> void { glBindRenderbuffer(GL_RENDERBUFFER, m_buffer); }
 auto renderbuffer::unbind() const -> void { glBindRenderbuffer(GL_RENDERBUFFER, 0); }
 
-}
+}  // namespace mono
 
