@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-#include "mono.hpp"
+#include "common.hpp"
 #include "image.hpp"
 
 namespace mono {

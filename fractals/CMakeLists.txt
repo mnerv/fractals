@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.17)
 project(fractals)
 
 # output location
@@ -6,6 +6,7 @@ if (NOT DEFINED WORKSPACE_LOCATION)
     set(WORKSPACE_LOCATION ".")
 endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${WORKSPACE_LOCATION}/bin")
+# set(CMAKE_XCODE_SCHEME_WORKING_DIRECTORY "${WORKSPACE_LOCATION}")
 
 # compilation flags
 set(CMAKE_CXX_STANDARD 20)

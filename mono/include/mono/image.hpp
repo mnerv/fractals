@@ -9,7 +9,7 @@
 #ifndef MONO_IMAGE_HPP
 #define MONO_IMAGE_HPP
 
-#include "mono.hpp"
+#include "common.hpp"
 #include <cstdint>
 
 namespace mono {

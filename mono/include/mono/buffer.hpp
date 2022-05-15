@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include "mono.hpp"
+#include "common.hpp"
 #include "texture.hpp"
 #include "shader.hpp"
 

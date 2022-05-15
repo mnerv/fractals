@@ -10,7 +10,7 @@
 #define MONO_FRAMEBUFFER_HPP
 
 #include <cstdint>
-#include "mono.hpp"
+#include "common.hpp"
 #include "buffer.hpp"
 #include "texture.hpp"
 

@@ -61,3 +61,5 @@ elseif(WIN32)
         "OpenGL32.lib"
     )
 endif()
+
+source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${TARGET_SOURCE_FILES})

@@ -14,14 +14,7 @@
 #include <random>
 
 #include "spdlog/spdlog.h"
-
-#include "mono/window.hpp"
-#include "mono/shader.hpp"
-#include "mono/buffer.hpp"
-#include "mono/texture.hpp"
-#include "mono/framebuffer.hpp"
-#include "mono/event.hpp"
-#include "mono/keyboard.hpp"
+#include "mono/mono.hpp"
 
 namespace nrv {
 struct vertex {
