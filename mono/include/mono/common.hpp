@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace mono {
+namespace mno {
 
 #define MONO_BIT(x) 1 << x
 
@@ -44,6 +44,6 @@ template <typename T, typename... Args>
 constexpr auto make_local(Args&&... args) -> local<T> {
     return std::make_unique<T>(std::forward<Args>(args)...);
 }
-}  // namespace mono
+}  // namespace mno
 
 #endif // MONO_COMMON_HPP

@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace mono {
+namespace mno {
 
 enum class keystate : std::int32_t {
     UNKNOWN = -1,
@@ -152,21 +152,21 @@ enum class key : std::int32_t {
     LAST            = MENU,
 };
 
-inline constexpr auto operator==(mono::key const& lhs, std::int32_t const& rhs) -> bool {
-    using T = std::underlying_type_t<mono::key>;
+inline constexpr auto operator==(mno::key const& lhs, std::int32_t const& rhs) -> bool {
+    using T = std::underlying_type_t<mno::key>;
     return static_cast<T>(lhs) == rhs;
 }
-inline constexpr auto operator==(std::int32_t const& lhs, mono::key const& rhs) -> bool {
+inline constexpr auto operator==(std::int32_t const& lhs, mno::key const& rhs) -> bool {
     return rhs == lhs;
 }
-inline constexpr auto operator!=(mono::key const& lhs, std::int32_t const& rhs) -> bool {
+inline constexpr auto operator!=(mno::key const& lhs, std::int32_t const& rhs) -> bool {
     return !(lhs == rhs);
 }
-inline constexpr auto operator!=(std::int32_t const& lhs, mono::key const& rhs) -> bool {
+inline constexpr auto operator!=(std::int32_t const& lhs, mno::key const& rhs) -> bool {
     return !(rhs == lhs);
 }
 
-}  // namespace mono
+}  // namespace mno
 
 #endif // MONO_KEYBOARD_HPP
 

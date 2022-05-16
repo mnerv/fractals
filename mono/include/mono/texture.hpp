@@ -14,17 +14,17 @@
 #include "common.hpp"
 #include "image.hpp"
 
-namespace mono {
+namespace mno {
 class texture {
   public:
-    explicit texture(mono::image const& image);
+    explicit texture(mno::image const& image);
     texture(std::int32_t const& width, std::int32_t const& height);
     ~texture();
 
     auto bind(std::uint32_t const& id = 0) const -> void;
     auto unbind() const -> void;
 
-    auto set_image(mono::image const& image) -> void;
+    auto set_image(mno::image const& image) -> void;
     auto resize(std::int32_t const& width, std::int32_t const& height) -> void;
     [[nodiscard]] auto buffer() const -> std::uint32_t { return m_buffer; }
     auto width()  const -> std::int32_t { return m_width; }
@@ -35,6 +35,6 @@ class texture {
     std::int32_t  m_width;
     std::int32_t  m_height;
 };
-}  // namespace mono
+}  // namespace mno
 
 #endif // MONO_TEXTURE_HPP

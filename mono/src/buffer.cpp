@@ -12,7 +12,7 @@
 #include "glad/glad.h"
 #include "spdlog/spdlog.h"
 
-namespace mono {
+namespace mno {
 
 buffer_layout::buffer_layout(std::initializer_list<buffer_element> const& elements)
     : m_elements(elements) {
@@ -77,7 +77,7 @@ array_buffer::~array_buffer() noexcept {
 auto array_buffer::bind() const -> void { glBindVertexArray(m_buffer); }
 auto array_buffer::unbind() const -> void { glBindVertexArray(0); }
 
-auto array_buffer::add_vertex_buffer(ref<mono::vertex_buffer> const& vertex_buffer) -> void {
+auto array_buffer::add_vertex_buffer(ref<mno::vertex_buffer> const& vertex_buffer) -> void {
     bind();
     vertex_buffer->bind();
     auto const& layout = vertex_buffer->layout();
@@ -124,5 +124,5 @@ auto renderbuffer::resize(std::int32_t const& width, std::int32_t const& height)
 auto renderbuffer::bind() const -> void { glBindRenderbuffer(GL_RENDERBUFFER, m_buffer); }
 auto renderbuffer::unbind() const -> void { glBindRenderbuffer(GL_RENDERBUFFER, 0); }
 
-}  // namespace mono
+}  // namespace mno
 

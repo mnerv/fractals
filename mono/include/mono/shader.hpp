@@ -21,7 +21,7 @@
 #include "glm/mat3x3.hpp"
 #include "glm/mat4x4.hpp"
 
-namespace mono {
+namespace mno {
 class shader {
   public:
     static auto make(std::string const& vertex_source, std::string const& fragment_source) -> local<shader>;
@@ -80,6 +80,6 @@ class shader {
   private:
     std::uint32_t m_id;
 };
-}  // namespace mono
+}  // namespace mno
 
 #endif // MONO_SHADER_HPP

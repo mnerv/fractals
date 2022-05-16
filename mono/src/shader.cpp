@@ -11,7 +11,7 @@
 #include "spdlog/spdlog.h"
 #include "glad/glad.h"
 
-namespace mono {
+namespace mno {
 static auto basic_vertex_shader = R"(#version 410 core
 layout(location = 0) in vec3 a_position;
 layout(location = 1) in vec4 a_color;
@@ -94,7 +94,7 @@ auto shader::mat4(std::string const& name, glm::mat4 const& value, bool const& t
 }
 
 auto shader::str() const -> std::string {
-    std::string str{"mono::shader { "};
+    std::string str{"mno::shader { "};
     str += "id: " + std::to_string(m_id);
     str += " }";
     return str;
@@ -143,4 +143,4 @@ auto shader::link(std::uint32_t const& fs, std::uint32_t const& vs) -> std::uint
 auto shader::uniform_location(std::string const& name) const -> std::int32_t {
     return glGetUniformLocation(m_id, name.c_str());
 }
-}  // namespace mono
+}  // namespace mno

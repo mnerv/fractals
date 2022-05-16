@@ -33,10 +33,10 @@ auto read_text(std::string const& filename) -> std::string {
 }  // namespace nrv
 
 struct keystate {
-    mono::key key;
+    mno::key key;
     bool states[2]{false, false};
 
-    keystate(mono::key k) : key{k} {}
+    keystate(mno::key k) : key{k} {}
     auto update(bool const& state) -> void {
         states[1] = states[0];
         states[0] = state;
@@ -45,14 +45,14 @@ struct keystate {
     inline auto release() const -> bool { return !states[1]; }
     inline auto click() const -> bool {return states[0] && !states[1]; }
 
-    inline static auto make(mono::key k) -> mono::local<keystate> {
-        return mono::make_local<keystate>(k);
+    inline static auto make(mno::key k) -> mno::local<keystate> {
+        return mno::make_local<keystate>(k);
     }
 };
 }
 
 auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[]) -> std::int32_t {
-    mono::window window{};
+    mno::window window{};
     window.set_position(window.xpos(), 200);
 
     nrv::vertex vertices[] {
@@ -69,33 +69,33 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     auto load_shader = [] {
         auto vertex_shader   = "./shaders/410.shader.gl.vert";
         auto fragment_shader = "./shaders/410.conway.gl.frag";
-        return mono::shader::make(nrv::read_text(vertex_shader),
+        return mno::shader::make(nrv::read_text(vertex_shader),
                                   nrv::read_text(fragment_shader));
     };
 
-    auto shader = mono::shader::make(
+    auto shader = mno::shader::make(
         nrv::read_text("./shaders/410.shader.gl.vert"),
         nrv::read_text("./shaders/410.conway_post.gl.frag")
     );
     auto conway_shader  = load_shader();
-    auto texture_shader = mono::shader::make(
+    auto texture_shader = mno::shader::make(
         nrv::read_text("./shaders/410.shader.gl.vert"),
         nrv::read_text("./shaders/410.texture.gl.frag")
     );
 
-    mono::array_buffer array_buffer{};
-    array_buffer.add_vertex_buffer(mono::vertex_buffer::make(vertices, sizeof(vertices), {
-        {mono::shader::type::vec3, "a_position"},
-        {mono::shader::type::vec4, "a_color"},
-        {mono::shader::type::vec2, "a_uv"},
+    mno::array_buffer array_buffer{};
+    array_buffer.add_vertex_buffer(mno::vertex_buffer::make(vertices, sizeof(vertices), {
+        {mno::shader::type::vec3, "a_position"},
+        {mno::shader::type::vec4, "a_color"},
+        {mno::shader::type::vec2, "a_uv"},
     }));
-    array_buffer.set_index_buffer(mono::index_buffer::make(indices, sizeof(indices), sizeof(indices) / sizeof(std::uint32_t)));
+    array_buffer.set_index_buffer(mno::index_buffer::make(indices, sizeof(indices), sizeof(indices) / sizeof(std::uint32_t)));
 
     auto width  = window.buffer_width();
     auto height = window.buffer_height();
 
-    auto buffer_a = mono::make_local<mono::framebuffer>(width, height);
-    auto buffer_b = mono::make_local<mono::framebuffer>(width, height);
+    auto buffer_a = mno::make_local<mno::framebuffer>(width, height);
+    auto buffer_b = mno::make_local<mno::framebuffer>(width, height);
 
     std::uint32_t frame = 0;
 
@@ -103,7 +103,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     std::mt19937 rng{rdev()};  // pass rdev into as seed
     std::uniform_int_distribution<std::mt19937::result_type> dist(0, 1);
 
-    mono::image noise_image{width, height};
+    mno::image noise_image{width, height};
     auto generate_noise = [&] {
         for (auto i = 0; i < noise_image.height(); i++) {
             for (auto j = 0; j < noise_image.width(); j++) {
@@ -113,18 +113,18 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         }
     };
     generate_noise();
-    auto noise_texture = mono::make_ref<mono::texture>(noise_image);
+    auto noise_texture = mno::make_ref<mno::texture>(noise_image);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    std::vector<mono::ref<nrv::keystate>> keys{};
+    std::vector<mno::ref<nrv::keystate>> keys{};
     auto update_keystates = [&] {
         std::for_each(std::begin(keys), std::end(keys), [&](auto& keystate) {
-            keystate->update(window.get_key(keystate->key) == mono::keystate::PRESS);
+            keystate->update(window.get_key(keystate->key) == mno::keystate::PRESS);
         });
     };
-    auto make_keystate = [&](mono::key const& key) {
+    auto make_keystate = [&](mno::key const& key) {
         keys.emplace_back(nrv::keystate::make(key));
         return keys.back();
     };
@@ -143,18 +143,18 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     auto is_running   = true;
     auto is_sim_pause = true;
 
-    auto move_left  = make_keystate(mono::key::A);
-    auto move_right = make_keystate(mono::key::D);
-    auto move_up    = make_keystate(mono::key::W);
-    auto move_down  = make_keystate(mono::key::S);
-    auto move_reset = make_keystate(mono::key::C);
+    auto move_left  = make_keystate(mno::key::A);
+    auto move_right = make_keystate(mno::key::D);
+    auto move_up    = make_keystate(mno::key::W);
+    auto move_down  = make_keystate(mno::key::S);
+    auto move_reset = make_keystate(mno::key::C);
 
-    auto zoom_reset = make_keystate(mono::key::N0);
-    auto zoom_in    = make_keystate(mono::key::F);
-    auto zoom_out   = make_keystate(mono::key::G);
+    auto zoom_reset = make_keystate(mno::key::N0);
+    auto zoom_in    = make_keystate(mno::key::F);
+    auto zoom_out   = make_keystate(mno::key::G);
 
-    auto play_pause = make_keystate(mono::key::SPACE);
-    auto step_sim   = make_keystate(mono::key::M);
+    auto play_pause = make_keystate(mno::key::SPACE);
+    auto step_sim   = make_keystate(mno::key::M);
 
     auto simulate = [&] {
         // FIRST PASS - Conway's Game of Life
@@ -200,19 +200,19 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     };
     simulate(); // run once to initialize buffers
 
-    auto key_down = [&](mono::event const& event) {
-        auto e = static_cast<mono::key_down_event const&>(event);
-        if (e.key() == mono::key::Q)
+    auto key_down = [&](mno::event const& event) {
+        auto e = static_cast<mno::key_down_event const&>(event);
+        if (e.key() == mno::key::Q)
             is_running = false;
     };
-    auto key_up = [&](mono::event const& event) {
-        auto e = static_cast<mono::key_up_event const&>(event);
-        if (e.key() == mono::key::R) {
+    auto key_up = [&](mno::event const& event) {
+        auto e = static_cast<mno::key_up_event const&>(event);
+        if (e.key() == mno::key::R) {
             spdlog::info("reload shader");
 
             noise_image.resize(width, height);
             generate_noise();
-            noise_texture = mono::make_ref<mono::texture>(noise_image);
+            noise_texture = mno::make_ref<mno::texture>(noise_image);
             glGenerateMipmap(GL_TEXTURE_2D);
             try {
                 conway_shader = load_shader();
@@ -223,8 +223,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             simulate();
         }
     };
-    window.add_event_listener(mono::event_type::key_down, key_down);
-    window.add_event_listener(mono::event_type::key_up, key_up);
+    window.add_event_listener(mno::event_type::key_down, key_down);
+    window.add_event_listener(mno::event_type::key_up, key_up);
 
     while (is_running) {
         last_time    = current_time;
@@ -269,8 +269,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             simulate();
 
         // update movement
-        location += velocity * mono::f32(delta_time);
-        zoom += zoom_dv * mono::f32(delta_time);
+        location += velocity * mno::f32(delta_time);
+        zoom += zoom_dv * mno::f32(delta_time);
 
         // FIRST PASS
         if (!is_sim_pause)

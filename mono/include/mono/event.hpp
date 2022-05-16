@@ -17,7 +17,7 @@
 #include "common.hpp"
 #include "keyboard.hpp"
 
-namespace mono {
+namespace mno {
 enum class event_category : std::uint8_t {
     none        = MONO_BIT(0),
     application = MONO_BIT(1),
@@ -187,7 +187,7 @@ class buffer_resize_event : public event {
 
 class mouse_move_event : public event {
   public:
-    mouse_move_event(mono::f64 const& x, mono::f64 const& y)
+    mouse_move_event(mno::f64 const& x, mno::f64 const& y)
         : event(event_type::mouse_move, event_category::mouse),
           m_x(x), m_y(y) {}
     ~mouse_move_event() = default;
@@ -203,18 +203,18 @@ class mouse_move_event : public event {
         return str;
     }
 
-    auto x() -> mono::f64 { return m_x; }
-    auto y() -> mono::f64 { return m_y; }
+    auto x() -> mno::f64 { return m_x; }
+    auto y() -> mno::f64 { return m_y; }
 
   private:
-    mono::f64 m_x;
-    mono::f64 m_y;
+    mno::f64 m_x;
+    mno::f64 m_y;
 };
 
 class mouse_press_event : public event {
   public:
     mouse_press_event(std::int32_t const& button, std::int32_t const& mods,
-                      mono::f64 const& x, mono::f64 const& y)
+                      mno::f64 const& x, mno::f64 const& y)
         : event(event_type::mouse_press, event_category::mouse),
           m_button(button), m_mods(mods), m_x(x), m_y(y) {}
     ~mouse_press_event() = default;
@@ -234,20 +234,20 @@ class mouse_press_event : public event {
 
     auto button() -> std::int32_t { return m_button; }
     auto mods() -> std::int32_t { return m_mods; }
-    auto x() -> mono::f64 { return m_x; }
-    auto y() -> mono::f64 { return m_y; }
+    auto x() -> mno::f64 { return m_x; }
+    auto y() -> mno::f64 { return m_y; }
 
   private:
     std::int32_t m_button;
     std::int32_t m_mods;
-    mono::f64 m_x;
-    mono::f64 m_y;
+    mno::f64 m_x;
+    mno::f64 m_y;
 };
 
 class mouse_release_event : public event {
   public:
     mouse_release_event(std::int32_t const& button, std::int32_t const& mods,
-                      mono::f64 const& x, mono::f64 const& y)
+                      mno::f64 const& x, mno::f64 const& y)
         : event(event_type::mouse_release, event_category::mouse),
           m_button(button), m_mods(mods), m_x(x), m_y(y) {}
     ~mouse_release_event() = default;
@@ -267,19 +267,19 @@ class mouse_release_event : public event {
 
     auto button() -> std::int32_t { return m_button; }
     auto mods() -> std::int32_t { return m_mods; }
-    auto x() -> mono::f64 { return m_x; }
-    auto y() -> mono::f64 { return m_y; }
+    auto x() -> mno::f64 { return m_x; }
+    auto y() -> mno::f64 { return m_y; }
 
   private:
     std::int32_t m_button;
     std::int32_t m_mods;
-    mono::f64 m_x;
-    mono::f64 m_y;
+    mno::f64 m_x;
+    mno::f64 m_y;
 };
 
 class mouse_wheel_event : public event {
   public:
-    mouse_wheel_event(mono::f64 const& dx, mono::f64 const& dy)
+    mouse_wheel_event(mno::f64 const& dx, mno::f64 const& dy)
         : event(event_type::mouse_wheel, event_category::mouse),
           m_dx(dx), m_dy(dy) {}
     ~mouse_wheel_event() = default;
@@ -295,17 +295,17 @@ class mouse_wheel_event : public event {
         return str;
     }
 
-    auto dx() -> mono::f64 { return m_dx; }
-    auto dy() -> mono::f64 { return m_dy; }
+    auto dx() -> mno::f64 { return m_dx; }
+    auto dy() -> mno::f64 { return m_dy; }
 
   private:
-    mono::f64 m_dx;
-    mono::f64 m_dy;
+    mno::f64 m_dx;
+    mno::f64 m_dy;
 };
 
 class mouse_enter_event : public event {
   public:
-    mouse_enter_event(mono::f64 const& x, mono::f64 const& y)
+    mouse_enter_event(mno::f64 const& x, mno::f64 const& y)
         : event(event_type::mouse_enter, event_category::mouse),
           m_x(x), m_y(y) {}
     ~mouse_enter_event() = default;
@@ -321,17 +321,17 @@ class mouse_enter_event : public event {
         return str;
     }
 
-    auto x() -> mono::f64 { return m_x; }
-    auto y() -> mono::f64 { return m_y; }
+    auto x() -> mno::f64 { return m_x; }
+    auto y() -> mno::f64 { return m_y; }
 
   private:
-    mono::f64 m_x;
-    mono::f64 m_y;
+    mno::f64 m_x;
+    mno::f64 m_y;
 };
 
 class mouse_leave_event : public event {
   public:
-    mouse_leave_event(mono::f64 const& x, mono::f64 const& y)
+    mouse_leave_event(mno::f64 const& x, mno::f64 const& y)
         : event(event_type::mouse_leave, event_category::mouse),
           m_x(x), m_y(y) {}
     ~mouse_leave_event() = default;
@@ -347,12 +347,12 @@ class mouse_leave_event : public event {
         return str;
     }
 
-    auto x() -> mono::f64 { return m_x; }
-    auto y() -> mono::f64 { return m_y; }
+    auto x() -> mno::f64 { return m_x; }
+    auto y() -> mno::f64 { return m_y; }
 
   private:
-    mono::f64 m_x;
-    mono::f64 m_y;
+    mno::f64 m_x;
+    mno::f64 m_y;
 };
 
 class key_down_event : public event {
@@ -444,7 +444,7 @@ class key_typed_event : public event {
     std::uint32_t m_code_point;
 };
 
-}  // namespace mono
+}  // namespace mno
 
 #endif // FRACTALS_EVENT_HPP
 

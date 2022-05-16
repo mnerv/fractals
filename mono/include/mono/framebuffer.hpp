@@ -14,11 +14,11 @@
 #include "buffer.hpp"
 #include "texture.hpp"
 
-namespace mono {
+namespace mno {
 class framebuffer {
   public:
     framebuffer(std::int32_t const& width, std::int32_t const& height);
-    framebuffer(ref<mono::texture> const& texture, ref<mono::renderbuffer> const& render);
+    framebuffer(ref<mno::texture> const& texture, ref<mno::renderbuffer> const& render);
     ~framebuffer() noexcept;
 
     auto bind() const -> void;
@@ -27,13 +27,13 @@ class framebuffer {
     auto height() const -> std::int32_t { return m_texture->height(); };
 
     auto resize(std::int32_t const& width, std::int32_t const& height) -> void;
-    auto texture() -> ref<mono::texture> { return m_texture; }
+    auto texture() -> ref<mno::texture> { return m_texture; }
 
   private:
     std::uint32_t           m_buffer{};
-    ref<mono::texture>      m_texture{nullptr};
-    ref<mono::renderbuffer> m_render{nullptr};
+    ref<mno::texture>      m_texture{nullptr};
+    ref<mno::renderbuffer> m_render{nullptr};
 };
-}  // namespace mono
+}  // namespace mno
 
 #endif // MONO_FRAMEBUFFER_HPP

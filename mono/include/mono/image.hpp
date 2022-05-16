@@ -12,7 +12,7 @@
 #include "common.hpp"
 #include <cstdint>
 
-namespace mono {
+namespace mno {
 class image {
   public:
     image(std::int32_t const& width, std::int32_t const& height, std::int32_t const& channels = 4);
@@ -37,6 +37,6 @@ class image {
     std::int32_t m_height;
     std::int32_t m_channels;
 };
-}  // namespace mono
+}  // namespace mno
 
 #endif // MONO_IMAGE_HPP

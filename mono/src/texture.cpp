@@ -9,7 +9,7 @@
 #include "texture.hpp"
 #include "glad/glad.h"
 
-namespace mono {
+namespace mno {
 
 texture::texture(std::int32_t const& width, std::int32_t const& height)
     : m_width(width), m_height(height) {
@@ -18,7 +18,7 @@ texture::texture(std::int32_t const& width, std::int32_t const& height)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 }
-texture::texture(mono::image const& image)
+texture::texture(mno::image const& image)
     : m_width(image.width()), m_height(image.height()) {
     glGenTextures(1, &m_buffer);
     glBindTexture(GL_TEXTURE_2D, m_buffer);
@@ -28,7 +28,7 @@ texture::texture(mono::image const& image)
 texture::~texture() {
     glDeleteTextures(1, &m_buffer);
 }
-auto texture::set_image(mono::image const& image) -> void {
+auto texture::set_image(mno::image const& image) -> void {
     m_width = image.width();
     m_height = image.height();
     glBindTexture(GL_TEXTURE_2D, m_buffer);
@@ -48,5 +48,5 @@ auto texture::bind(std::uint32_t const& id) const -> void {
 }
 auto texture::unbind() const -> void { glBindTexture(GL_TEXTURE_2D, 0); }
 
-}  // namespace mono
+}  // namespace mno
 

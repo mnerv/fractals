@@ -10,11 +10,11 @@
 
 #include "glad/glad.h"
 
-namespace mono {
+namespace mno {
 framebuffer::framebuffer(std::int32_t const& width, std::int32_t const& height)
-        : framebuffer(make_ref<mono::texture>(width, height),make_ref<mono::renderbuffer>(width, height)) {}
+        : framebuffer(make_ref<mno::texture>(width, height),make_ref<mno::renderbuffer>(width, height)) {}
 
-framebuffer::framebuffer(ref<mono::texture> const& texture, ref<mono::renderbuffer> const& render)
+framebuffer::framebuffer(ref<mno::texture> const& texture, ref<mno::renderbuffer> const& render)
         : m_texture(texture), m_render(render) {
     glGenFramebuffers(1, &m_buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_buffer);
@@ -41,5 +41,5 @@ auto framebuffer::bind() const -> void {
     glBindFramebuffer(GL_FRAMEBUFFER, m_buffer);
 }
 auto framebuffer::unbind() const -> void { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
-}  // namespace mono
+}  // namespace mno
 

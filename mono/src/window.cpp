@@ -11,7 +11,7 @@
 
 #include "spdlog/spdlog.h"
 
-namespace mono {
+namespace mno {
 static auto setup_opengl() -> void {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -21,7 +21,7 @@ static auto setup_opengl() -> void {
 
 window::window(const window_props &props) {
     if (!glfwInit()) throw std::runtime_error("Error initializing GLFW!");
-    mono::setup_opengl();
+    mno::setup_opengl();
     m_data.title  = props.title;
     m_data.width  = props.width;
     m_data.height = props.height;
@@ -46,7 +46,7 @@ window::window(const window_props &props) {
     // TODO: Better event systems, right now this calls the event handler for each event.
     glfwSetWindowSizeCallback(m_window,
     [](GLFWwindow* window, std::int32_t width, std::int32_t height) {
-        auto data = mono::window::user_ptr(window);
+        auto data = mno::window::user_ptr(window);
         data->width  = width;
         data->height = height;
 
@@ -60,7 +60,7 @@ window::window(const window_props &props) {
     });
     glfwSetFramebufferSizeCallback(m_window,
     [](GLFWwindow* window, std::int32_t width, std::int32_t height) {
-        auto data = mono::window::user_ptr(window);
+        auto data = mno::window::user_ptr(window);
         data->buffer_width  = width;
         data->buffer_height = height;
 
@@ -74,7 +74,7 @@ window::window(const window_props &props) {
     });
     glfwSetWindowPosCallback(m_window,
     [](GLFWwindow* window, std::int32_t xpos, std::int32_t ypos) {
-        auto data = mono::window::user_ptr(window);
+        auto data = mno::window::user_ptr(window);
         data->xpos = xpos;
         data->ypos = ypos;
 
@@ -87,8 +87,8 @@ window::window(const window_props &props) {
         });
     });
     glfwSetCursorPosCallback(m_window,
-    [](GLFWwindow* window, mono::f64 xpos, mono::f64 ypos) {
-        auto data = mono::window::user_ptr(window);
+    [](GLFWwindow* window, mno::f64 xpos, mno::f64 ypos) {
+        auto data = mno::window::user_ptr(window);
 
         auto it = data->events.find(event_type::mouse_move);
         if (it == data->events.end()) return;
@@ -99,8 +99,8 @@ window::window(const window_props &props) {
         });
     });
     glfwSetCursorEnterCallback(m_window, [](GLFWwindow* window, std::int32_t entered) {
-       auto data = mono::window::user_ptr(window);
-        mono::f64 pos_x, pos_y;
+       auto data = mno::window::user_ptr(window);
+        mno::f64 pos_x, pos_y;
         glfwGetCursorPos(window, &pos_x, &pos_y);
 
         if (entered) {
@@ -125,8 +125,8 @@ window::window(const window_props &props) {
     });
     glfwSetMouseButtonCallback(m_window,
     [](GLFWwindow* window, std::int32_t button, std::int32_t action, std::int32_t mods) {
-        auto data = mono::window::user_ptr(window);
-        mono::f64 pos_x, pos_y;
+        auto data = mno::window::user_ptr(window);
+        mno::f64 pos_x, pos_y;
         glfwGetCursorPos(window, &pos_x, &pos_y);
 
         if (action == GLFW_PRESS) {
@@ -151,7 +151,7 @@ window::window(const window_props &props) {
     });
     glfwSetScrollCallback(m_window,
     [](GLFWwindow* window, f64 xoffset, f64 yoffset){
-        auto data = mono::window::user_ptr(window);
+        auto data = mno::window::user_ptr(window);
         auto it = data->events.find(event_type::mouse_wheel);
         if (it == data->events.end()) return;
         auto fns = it->second;
@@ -162,7 +162,7 @@ window::window(const window_props &props) {
     });
     glfwSetKeyCallback(m_window,
     [](GLFWwindow* window, std::int32_t key, std::int32_t code, std::int32_t action, std::int32_t mods) {
-        auto data = mono::window::user_ptr(window);
+        auto data = mno::window::user_ptr(window);
         if (action == GLFW_PRESS || action == GLFW_REPEAT) {
             auto it = data->events.find(event_type::key_down);
             if (it == data->events.end()) return;
@@ -185,7 +185,7 @@ window::window(const window_props &props) {
     });
     glfwSetCharCallback(m_window,
     [](GLFWwindow* window, unsigned int codepoint) {
-        auto data = mono::window::user_ptr(window);
+        auto data = mno::window::user_ptr(window);
         auto it = data->events.find(event_type::key_typed);
         if (it == data->events.end()) return;
         auto fns = it->second;
@@ -197,7 +197,7 @@ window::window(const window_props &props) {
     });
     glfwSetDropCallback(m_window,
     [](GLFWwindow* window, std::int32_t count, char const** paths){
-        auto data = mono::window::user_ptr(window);
+        auto data = mno::window::user_ptr(window);
         auto it = data->events.find(event_type::drop);
         if (it == data->events.end()) return;
 
@@ -221,9 +221,9 @@ auto window::poll() -> void {
     glfwPollEvents();
 }
 
-auto window::get_key(mono::key const& key) -> mono::keystate {
-    using T = std::underlying_type_t<mono::key>;
+auto window::get_key(mno::key const& key) -> mno::keystate {
+    using T = std::underlying_type_t<mno::key>;
     auto const current_state = glfwGetKey(m_window, static_cast<T>(key));
-    return static_cast<mono::keystate>(current_state);
+    return static_cast<mno::keystate>(current_state);
 }
-}  // namespace mono
+}  // namespace mno

@@ -9,7 +9,7 @@
 #include <iostream>
 #include "image.hpp"
 
-namespace mono {
+namespace mno {
 image::image(std::int32_t const& width, std::int32_t const& height, std::int32_t const& channels)
     : m_width(width), m_height(height), m_channels(channels) {
     m_buffer = new std::uint8_t[std::size_t(m_width * m_height * m_channels)];
@@ -50,5 +50,5 @@ auto image::set(std::int32_t const& x, std::int32_t const& y,
     m_buffer[index + 2] = blue;
     m_buffer[index + 3] = alpha;
 }
-}  // namespace mono
+}  // namespace mno
 

@@ -18,7 +18,7 @@
 #include "texture.hpp"
 #include "shader.hpp"
 
-namespace mono {
+namespace mno {
 
 struct buffer_element {
     shader::type  type;
@@ -169,17 +169,17 @@ class array_buffer {
     auto bind() const -> void;
     auto unbind() const -> void;
 
-    auto add_vertex_buffer(ref<mono::vertex_buffer> const& vertex_buffer) -> void;
-    auto set_index_buffer(ref<mono::index_buffer> const& index_buffer) -> void { m_index_buffer = index_buffer; }
-    auto vertex_buffer() const -> ref<mono::vertex_buffer> { return m_vertex_buffer; }
-    auto index_buffer() const -> ref<mono::index_buffer> { return m_index_buffer; }
+    auto add_vertex_buffer(ref<mno::vertex_buffer> const& vertex_buffer) -> void;
+    auto set_index_buffer(ref<mno::index_buffer> const& index_buffer) -> void { m_index_buffer = index_buffer; }
+    auto vertex_buffer() const -> ref<mno::vertex_buffer> { return m_vertex_buffer; }
+    auto index_buffer() const -> ref<mno::index_buffer> { return m_index_buffer; }
 
   private:
     std::uint32_t m_buffer{};
-    ref<mono::vertex_buffer>       m_vertex_buffer;
-    ref<mono::index_buffer>  m_index_buffer;
+    ref<mno::vertex_buffer>       m_vertex_buffer;
+    ref<mno::index_buffer>  m_index_buffer;
 };
 
-}  // namespace mono
+}  // namespace mno
 
 #endif // MONO_BUFFER_HPP

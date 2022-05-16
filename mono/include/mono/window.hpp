@@ -24,9 +24,9 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-namespace mono {
+namespace mno {
 struct window_props {
-    std::string  title  = "mono::window";
+    std::string  title  = "mno::window";
     std::int32_t width  = 738;
     std::int32_t height = 480;
     std::int32_t xpos{INT32_MIN};
@@ -56,7 +56,7 @@ class window {
     auto poll() -> void;
     auto time() const -> double { return glfwGetTime(); }
 
-    auto get_key(mono::key const& key) -> mono::keystate;
+    auto get_key(mno::key const& key) -> mno::keystate;
 
     // TODO: Add type constraints and maybe if possible have it so the lambda can have the inherit parameter type
     template <typename Callable>
@@ -79,7 +79,7 @@ class window {
 
   public:
     [[nodiscard]] auto str() const -> std::string {
-        std::string str{"mono::window { "};
+        std::string str{"mno::window { "};
         str += "title: \"" + m_data.title + "\", ";
         str += "width: "  + std::to_string(m_data.width)  + ", ";
         str += "height: " + std::to_string(m_data.height) + ", ";
@@ -109,6 +109,6 @@ class window {
         return static_cast<window::data*>(glfwGetWindowUserPointer(window));
     }
 };
-}  // namespace mono
+}  // namespace mno
 
 #endif // MONO_WINDOW_HPP
