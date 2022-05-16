@@ -41,9 +41,9 @@ struct keystate {
         states[1] = states[0];
         states[0] = state;
     }
-    inline auto press() const -> bool {return states[0]; }
-    inline auto release() const -> bool { return !states[1]; }
-    inline auto click() const -> bool {return states[0] && !states[1]; }
+    inline auto pressed() const -> bool {return states[0]; }
+    inline auto releaseed() const -> bool { return !states[1]; }
+    inline auto clicked() const -> bool {return states[0] && !states[1]; }
 
     inline static auto make(mno::key k) -> mno::local<keystate> {
         return mno::make_local<keystate>(k);
@@ -107,7 +107,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     auto generate_noise = [&] {
         for (auto i = 0; i < noise_image.height(); i++) {
             for (auto j = 0; j < noise_image.width(); j++) {
-                auto data = std::uint8_t(dist(rng) * 255);
+                auto data = mno::u8(dist(rng) * 255);
                 noise_image.set(j, i, data, data, data);
             }
         }
@@ -121,7 +121,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     std::vector<mno::ref<nrv::keystate>> keys{};
     auto update_keystates = [&] {
         std::for_each(std::begin(keys), std::end(keys), [&](auto& keystate) {
-            keystate->update(window.get_key(keystate->key) == mno::keystate::PRESS);
+            keystate->update(window.keystate(keystate->key) == mno::keystate::PRESS);
         });
     };
     auto make_keystate = [&](mno::key const& key) {
@@ -133,11 +133,11 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     auto last_time    = current_time;
     auto delta_time   = current_time - last_time;
 
-    float pan_speed  = 0.15f;
-    float zoom_speed = 0.15f;
+    mno::f32 pan_speed  = 0.15f;
+    mno::f32 zoom_speed = 0.15f;
 
-    float zoom_dv = 0.0f;
-    float zoom    = 1.0f;
+    mno::f32 zoom_dv = 0.0f;
+    mno::f32 zoom    = 1.0f;
     glm::vec2 velocity{0.0, 0.0};
     glm::vec2 location{0.0, 0.0};
     auto is_running   = true;
@@ -200,6 +200,19 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     };
     simulate(); // run once to initialize buffers
 
+    auto reload_shader = [&] {
+        noise_image.resize(width, height);
+        generate_noise();
+        noise_texture->set_image(noise_image);
+        try {
+            conway_shader = load_shader();
+        } catch (std::runtime_error const& e) {
+            spdlog::error(e.what());
+        }
+        frame = 0;
+        simulate();
+    };
+
     auto key_down = [&](mno::event const& event) {
         auto e = static_cast<mno::key_down_event const&>(event);
         if (e.key() == mno::key::Q)
@@ -209,18 +222,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         auto e = static_cast<mno::key_up_event const&>(event);
         if (e.key() == mno::key::R) {
             spdlog::info("reload shader");
-
-            noise_image.resize(width, height);
-            generate_noise();
-            noise_texture = mno::make_ref<mno::texture>(noise_image);
-            glGenerateMipmap(GL_TEXTURE_2D);
-            try {
-                conway_shader = load_shader();
-            } catch (std::runtime_error const& e) {
-                spdlog::error(e.what());
-            }
-            frame = 0;
-            simulate();
+            reload_shader();
         }
     };
     window.add_event_listener(mno::event_type::key_down, key_down);
@@ -237,35 +239,35 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         update_keystates();
 
         // handle input
-        if (move_left->press())
+        if (move_left->pressed())
             velocity.x = -pan_speed;
-        else if (move_right->press())
+        else if (move_right->pressed())
             velocity.x = pan_speed;
         else
             velocity.x = 0.0f;
 
-        if (move_up->press())
+        if (move_up->pressed())
             velocity.y = pan_speed;
-        else if (move_down->press())
+        else if (move_down->pressed())
             velocity.y = -pan_speed;
         else
             velocity.y = 0.0f;
 
-        if (zoom_in->press())
+        if (zoom_in->pressed())
             zoom_dv = -zoom_speed;
-        else if (zoom_out->press())
+        else if (zoom_out->pressed())
             zoom_dv = zoom_speed;
         else
             zoom_dv = 0.0f;
 
-        if (zoom_reset->click())
+        if (zoom_reset->clicked())
             zoom = 1.0f;
-        if (move_reset->click())
+        if (move_reset->clicked())
             location = {0.0f, 0.0f};
 
-        if (play_pause->click())
+        if (play_pause->clicked())
             is_sim_pause = !is_sim_pause;
-        if (step_sim->click())
+        if (step_sim->clicked())
             simulate();
 
         // update movement

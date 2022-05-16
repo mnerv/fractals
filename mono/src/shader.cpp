@@ -57,16 +57,16 @@ shader::~shader() {
 auto shader::bind() const -> void { glUseProgram(m_id); }
 auto shader::unbind() const -> void { glUseProgram(0); }
 
-auto shader::num(std::string const& name, std::uint32_t const& value) -> void {
+auto shader::num(std::string const& name, mno::u32 const& value) -> void {
     glUniform1ui(uniform_location(name), value);
 }
-auto shader::num(std::string const& name, std::int32_t const& value) -> void {
+auto shader::num(std::string const& name, mno::i32 const& value) -> void {
     glUniform1i(uniform_location(name), value);
 }
-auto shader::num(std::string const& name, float const& value) -> void {
+auto shader::num(std::string const& name, mno::f32 const& value) -> void {
     glUniform1f(uniform_location(name), value);
 }
-auto shader::num(std::string const& name, std::int32_t const& count, float const* value) -> void {
+auto shader::num(std::string const& name, mno::i32 const& count, float const* value) -> void {
     glUniform1fv(uniform_location(name), count, value);
 }
 
@@ -100,7 +100,7 @@ auto shader::str() const -> std::string {
     return str;
 }
 
-auto shader::compile(std::uint32_t const& type, char const* source) -> std::uint32_t {
+auto shader::compile(mno::u32 const& type, char const* source) -> mno::u32 {
     std::uint32_t shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
@@ -119,13 +119,13 @@ auto shader::compile(std::uint32_t const& type, char const* source) -> std::uint
 
     return shader;
 }
-auto shader::link(std::uint32_t const& fs, std::uint32_t const& vs) -> std::uint32_t {
-    std::uint32_t program = glCreateProgram();
+auto shader::link(mno::u32 const& fs, mno::u32 const& vs) -> mno::u32 {
+    mno::u32 program = glCreateProgram();
     glAttachShader(program, vs);
     glAttachShader(program, fs);
     glLinkProgram(program);
 
-    std::int32_t is_success;
+    mno::i32 is_success;
     constexpr auto LOG_SIZE = 512;
     static char info_log[LOG_SIZE];
     glGetProgramiv(program, GL_LINK_STATUS, &is_success);
@@ -140,7 +140,7 @@ auto shader::link(std::uint32_t const& fs, std::uint32_t const& vs) -> std::uint
     glDeleteShader(fs);
     return program;
 }
-auto shader::uniform_location(std::string const& name) const -> std::int32_t {
+auto shader::uniform_location(std::string const& name) const -> mno::i32 {
     return glGetUniformLocation(m_id, name.c_str());
 }
 }  // namespace mno

@@ -23,6 +23,7 @@
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
+#include "glm/vec2.hpp"
 
 namespace mno {
 struct window_props {
@@ -56,7 +57,8 @@ class window {
     auto poll() -> void;
     auto time() const -> double { return glfwGetTime(); }
 
-    auto get_key(mno::key const& key) -> mno::keystate;
+    auto mouse_pos(f64& x, f64& y) const -> void;
+    auto keystate(mno::key const& key) const -> mno::keystate;
 
     // TODO: Add type constraints and maybe if possible have it so the lambda can have the inherit parameter type
     template <typename Callable>

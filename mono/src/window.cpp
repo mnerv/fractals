@@ -72,6 +72,19 @@ window::window(const window_props &props) {
             fn.second(event);
         });
     });
+    //glfwSetWindowContentScaleCallback(m_window,
+    //[](GLFWwindow* window, float xscale, float yscale){
+    //    auto data = mno::window::user_ptr(window);
+    //});
+    //glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* window, std::int32_t iconified) {
+    //    auto data = mno::window::user_ptr(window);
+    //});
+    //glfwSetWindowMaximizeCallback(m_window, [](GLFWwindow* window, std::int32_t maximized) {
+    //    auto data = mno::window::user_ptr(window);
+    //})
+    //glfwSetWindowFocusCallback(m_window, [](GLFWwindow* window, int focused){
+    //    auto data = mno::window::user_ptr(window);
+    //});
     glfwSetWindowPosCallback(m_window,
     [](GLFWwindow* window, std::int32_t xpos, std::int32_t ypos) {
         auto data = mno::window::user_ptr(window);
@@ -221,7 +234,10 @@ auto window::poll() -> void {
     glfwPollEvents();
 }
 
-auto window::get_key(mno::key const& key) -> mno::keystate {
+auto window::mouse_pos(f64 &x, f64 &y) const -> void {
+    glfwGetCursorPos(m_window, &x, &y);
+}
+auto window::keystate(mno::key const& key) const -> mno::keystate {
     using T = std::underlying_type_t<mno::key>;
     auto const current_state = glfwGetKey(m_window, static_cast<T>(key));
     return static_cast<mno::keystate>(current_state);

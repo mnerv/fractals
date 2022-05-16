@@ -6,8 +6,8 @@
  *
  * @copyright Copyright (c) 2022
  */
-#ifndef FRACTALS_EVENT_HPP
-#define FRACTALS_EVENT_HPP
+#ifndef MONO_EVENT_HPP
+#define MONO_EVENT_HPP
 
 #include <cstdint>
 #include <string>
@@ -76,8 +76,8 @@ class drop_event : public event {
         return str;
     }
 
-    auto size() -> std::size_t { return m_paths.size(); }
-    auto paths() -> std::vector<std::string> { return m_paths; }
+    auto size() const -> std::size_t { return m_paths.size(); }
+    auto paths() const -> std::vector<std::string> { return m_paths; }
 
   private:
     std::vector<std::string> m_paths;
@@ -111,7 +111,7 @@ class window_resize_event : public event {
 
 class window_move_event : public event {
   public:
-    window_move_event(std::int32_t const& x, int32_t const& y)
+    window_move_event(std::int32_t const& x, std::int32_t const& y)
         : event(event_type::window_move, event_category::window),
           m_x(x), m_y(y) {}
     ~window_move_event() = default;
@@ -161,7 +161,7 @@ class window_focus_event : public event {
 
 class buffer_resize_event : public event {
   public:
-    buffer_resize_event(std::int32_t const& width, int32_t const& height)
+    buffer_resize_event(std::int32_t const& width, std::int32_t const& height)
         : event(event_type::buffer_resize, event_category::window),
           m_width(width), m_height(height) {}
     ~buffer_resize_event() = default;
@@ -203,8 +203,8 @@ class mouse_move_event : public event {
         return str;
     }
 
-    auto x() -> mno::f64 { return m_x; }
-    auto y() -> mno::f64 { return m_y; }
+    auto x() const -> mno::f64 { return m_x; }
+    auto y() const -> mno::f64 { return m_y; }
 
   private:
     mno::f64 m_x;
@@ -232,10 +232,10 @@ class mouse_press_event : public event {
         return str;
     }
 
-    auto button() -> std::int32_t { return m_button; }
-    auto mods() -> std::int32_t { return m_mods; }
-    auto x() -> mno::f64 { return m_x; }
-    auto y() -> mno::f64 { return m_y; }
+    auto button() const -> std::int32_t { return m_button; }
+    auto mods() const -> std::int32_t { return m_mods; }
+    auto x() const -> mno::f64 { return m_x; }
+    auto y() const -> mno::f64 { return m_y; }
 
   private:
     std::int32_t m_button;
@@ -265,10 +265,10 @@ class mouse_release_event : public event {
         return str;
     }
 
-    auto button() -> std::int32_t { return m_button; }
-    auto mods() -> std::int32_t { return m_mods; }
-    auto x() -> mno::f64 { return m_x; }
-    auto y() -> mno::f64 { return m_y; }
+    auto button() const -> std::int32_t { return m_button; }
+    auto mods() const -> std::int32_t { return m_mods; }
+    auto x() const -> mno::f64 { return m_x; }
+    auto y() const -> mno::f64 { return m_y; }
 
   private:
     std::int32_t m_button;
@@ -295,8 +295,8 @@ class mouse_wheel_event : public event {
         return str;
     }
 
-    auto dx() -> mno::f64 { return m_dx; }
-    auto dy() -> mno::f64 { return m_dy; }
+    auto dx() const -> mno::f64 { return m_dx; }
+    auto dy() const -> mno::f64 { return m_dy; }
 
   private:
     mno::f64 m_dx;
@@ -321,8 +321,8 @@ class mouse_enter_event : public event {
         return str;
     }
 
-    auto x() -> mno::f64 { return m_x; }
-    auto y() -> mno::f64 { return m_y; }
+    auto x() const -> mno::f64 { return m_x; }
+    auto y() const -> mno::f64 { return m_y; }
 
   private:
     mno::f64 m_x;
@@ -347,8 +347,8 @@ class mouse_leave_event : public event {
         return str;
     }
 
-    auto x() -> mno::f64 { return m_x; }
-    auto y() -> mno::f64 { return m_y; }
+    auto x() const -> mno::f64 { return m_x; }
+    auto y() const -> mno::f64 { return m_y; }
 
   private:
     mno::f64 m_x;
@@ -378,10 +378,10 @@ class key_down_event : public event {
         return str;
     }
 
-    auto key()  -> std::int32_t { return m_key; }
-    auto scan() -> std::int32_t { return m_scan; }
-    auto mods() -> std::int32_t { return m_mods; }
-    auto is_repeat() -> bool { return m_is_repeat; }
+    auto key()  const -> std::int32_t { return m_key; }
+    auto scan() const -> std::int32_t { return m_scan; }
+    auto mods() const -> std::int32_t { return m_mods; }
+    auto is_repeat() const -> bool { return m_is_repeat; }
 
   private:
     std::int32_t m_key;
@@ -411,9 +411,9 @@ class key_up_event : public event {
         return str;
     }
 
-    auto key()  -> std::int32_t { return m_key; }
-    auto scan() -> std::int32_t { return m_scan; }
-    auto mods() -> std::int32_t { return m_mods; }
+    auto key()  const -> std::int32_t { return m_key; }
+    auto scan() const -> std::int32_t { return m_scan; }
+    auto mods() const -> std::int32_t { return m_mods; }
 
   private:
     std::int32_t m_key;
@@ -438,7 +438,7 @@ class key_typed_event : public event {
         return str;
     }
 
-    auto code() -> std::uint32_t { return m_code_point; }
+    auto code() const -> std::uint32_t { return m_code_point; }
 
   private:
     std::uint32_t m_code_point;
@@ -446,5 +446,5 @@ class key_typed_event : public event {
 
 }  // namespace mno
 
-#endif // FRACTALS_EVENT_HPP
+#endif // MONO_EVENT_HPP
 

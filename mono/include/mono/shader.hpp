@@ -56,10 +56,10 @@ class shader {
 
     // uniform uploads
   public:
-    auto num(std::string const& name, std::uint32_t const& value) -> void;
-    auto num(std::string const& name, std::int32_t const& value) -> void;
-    auto num(std::string const& name, float const& value) -> void;
-    auto num(std::string const& name, std::int32_t const& count, float const* value) -> void;
+    auto num(std::string const& name, mno::u32 const& value) -> void;
+    auto num(std::string const& name, mno::i32 const& value) -> void;
+    auto num(std::string const& name, mno::f32 const& value) -> void;
+    auto num(std::string const& name, mno::i32 const& count, float const* value) -> void;
 
     auto vec2(std::string const& name, glm::vec2 const& value) -> void;
     auto vec3(std::string const& name, glm::vec3 const& value) -> void;
@@ -73,12 +73,12 @@ class shader {
     [[nodiscard]] auto str() const -> std::string;
 
   private:
-    static auto compile(std::uint32_t const& type, char const* source) -> std::uint32_t;
-    static auto link(std::uint32_t const& fs, std::uint32_t const& vs) -> std::uint32_t;
-    [[nodiscard]] auto uniform_location(std::string const& name) const -> std::int32_t;
+    static auto compile(mno::u32 const& type, char const* source) -> mno::u32;
+    static auto link(mno::u32 const& fs, mno::u32 const& vs) -> mno::u32;
+    [[nodiscard]] auto uniform_location(std::string const& name) const -> mno::i32;
 
   private:
-    std::uint32_t m_id;
+    mno::u32 m_id;
 };
 }  // namespace mno
 
