@@ -168,7 +168,9 @@ window::window(const window_props &props) {
         auto it = data->events.find(event_type::mouse_wheel);
         if (it == data->events.end()) return;
         auto fns = it->second;
-        auto event = mouse_wheel_event(xoffset, yoffset);
+        mno::f64 x, y;
+        glfwGetCursorPos(window, &x, &y);
+        auto event = mouse_wheel_event(xoffset, yoffset, x, y);
         std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
             fn.second(event);
         });

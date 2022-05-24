@@ -185,15 +185,14 @@ class buffer_resize_event : public event {
     std::int32_t m_height;
 };
 
-class mouse_move_event : public event {
+class mouse_event : public event {
   public:
-    mouse_move_event(mno::f64 const& x, mno::f64 const& y)
-        : event(event_type::mouse_move, event_category::mouse),
-          m_x(x), m_y(y) {}
-    ~mouse_move_event() = default;
+    mouse_event(event_type const& type, mno::f64 const& x, mno::f64 const& y)
+        : event(type, event_category::mouse), m_x(x), m_y(y) {}
+    virtual ~mouse_event() = default;
 
     auto name() const -> std::string override {
-        return "mouse_move_event";
+        return "mouse_event";
     }
     auto str() const -> std::string override {
         using namespace std::string_literals;
@@ -206,17 +205,35 @@ class mouse_move_event : public event {
     auto x() const -> mno::f64 { return m_x; }
     auto y() const -> mno::f64 { return m_y; }
 
-  private:
+  protected:
     mno::f64 m_x;
     mno::f64 m_y;
 };
 
-class mouse_press_event : public event {
+class mouse_move_event : public mouse_event {
+  public:
+    mouse_move_event(mno::f64 const& x, mno::f64 const& y)
+        : mouse_event(event_type::mouse_move, x, y) {}
+    ~mouse_move_event() = default;
+
+    auto name() const -> std::string override {
+        return "mouse_move_event";
+    }
+    auto str() const -> std::string override {
+        using namespace std::string_literals;
+        std::string str{name() + " { "};
+        str += "x: " + std::to_string(m_x) + ", ";
+        str += "y: " + std::to_string(m_y) + " }";
+        return str;
+    }
+};
+
+class mouse_press_event : public mouse_event {
   public:
     mouse_press_event(std::int32_t const& button, std::int32_t const& mods,
                       mno::f64 const& x, mno::f64 const& y)
-        : event(event_type::mouse_press, event_category::mouse),
-          m_button(button), m_mods(mods), m_x(x), m_y(y) {}
+        : mouse_event(event_type::mouse_press, x, y),
+          m_button(button), m_mods(mods) {}
     ~mouse_press_event() = default;
 
     auto name() const -> std::string override {
@@ -234,22 +251,18 @@ class mouse_press_event : public event {
 
     auto button() const -> std::int32_t { return m_button; }
     auto mods() const -> std::int32_t { return m_mods; }
-    auto x() const -> mno::f64 { return m_x; }
-    auto y() const -> mno::f64 { return m_y; }
 
   private:
     std::int32_t m_button;
     std::int32_t m_mods;
-    mno::f64 m_x;
-    mno::f64 m_y;
 };
 
-class mouse_release_event : public event {
+class mouse_release_event : public mouse_event {
   public:
     mouse_release_event(std::int32_t const& button, std::int32_t const& mods,
                       mno::f64 const& x, mno::f64 const& y)
-        : event(event_type::mouse_release, event_category::mouse),
-          m_button(button), m_mods(mods), m_x(x), m_y(y) {}
+        : mouse_event(event_type::mouse_release, x, y),
+          m_button(button), m_mods(mods) {}
     ~mouse_release_event() = default;
 
     auto name() const -> std::string override {
@@ -267,20 +280,16 @@ class mouse_release_event : public event {
 
     auto button() const -> std::int32_t { return m_button; }
     auto mods() const -> std::int32_t { return m_mods; }
-    auto x() const -> mno::f64 { return m_x; }
-    auto y() const -> mno::f64 { return m_y; }
 
-  private:
+  protected:
     std::int32_t m_button;
     std::int32_t m_mods;
-    mno::f64 m_x;
-    mno::f64 m_y;
 };
 
-class mouse_wheel_event : public event {
+class mouse_wheel_event : public mouse_event {
   public:
-    mouse_wheel_event(mno::f64 const& dx, mno::f64 const& dy)
-        : event(event_type::mouse_wheel, event_category::mouse),
+    mouse_wheel_event(mno::f64 const& dx, mno::f64 const& dy, mno::f64 const& x, mno::f64 const& y)
+        : mouse_event(event_type::mouse_wheel, x, y),
           m_dx(dx), m_dy(dy) {}
     ~mouse_wheel_event() = default;
 
@@ -291,7 +300,9 @@ class mouse_wheel_event : public event {
         using namespace std::string_literals;
         std::string str{name() + " { "};
         str += "dx: "  + std::to_string(m_dx)  + ", ";
-        str += "dy: " + std::to_string(m_dy) + " }";
+        str += "dy: " + std::to_string(m_dy) + ", ";
+        str += "x: " + std::to_string(m_x) + ", ";
+        str += "y: " + std::to_string(m_y) + " }";
         return str;
     }
 
@@ -303,11 +314,10 @@ class mouse_wheel_event : public event {
     mno::f64 m_dy;
 };
 
-class mouse_enter_event : public event {
+class mouse_enter_event : public mouse_event {
   public:
     mouse_enter_event(mno::f64 const& x, mno::f64 const& y)
-        : event(event_type::mouse_enter, event_category::mouse),
-          m_x(x), m_y(y) {}
+        : mouse_event(event_type::mouse_enter, x, y) {}
     ~mouse_enter_event() = default;
 
     auto name() const -> std::string override {
@@ -320,20 +330,12 @@ class mouse_enter_event : public event {
         str += "y: " + std::to_string(m_y) + " }";
         return str;
     }
-
-    auto x() const -> mno::f64 { return m_x; }
-    auto y() const -> mno::f64 { return m_y; }
-
-  private:
-    mno::f64 m_x;
-    mno::f64 m_y;
 };
 
-class mouse_leave_event : public event {
+class mouse_leave_event : public mouse_event {
   public:
     mouse_leave_event(mno::f64 const& x, mno::f64 const& y)
-        : event(event_type::mouse_leave, event_category::mouse),
-          m_x(x), m_y(y) {}
+        : mouse_event(event_type::mouse_leave, x, y) {}
     ~mouse_leave_event() = default;
 
     auto name() const -> std::string override {
@@ -346,13 +348,6 @@ class mouse_leave_event : public event {
         str += "y: " + std::to_string(m_y) + " }";
         return str;
     }
-
-    auto x() const -> mno::f64 { return m_x; }
-    auto y() const -> mno::f64 { return m_y; }
-
-  private:
-    mno::f64 m_x;
-    mno::f64 m_y;
 };
 
 class key_down_event : public event {
