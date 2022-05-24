@@ -12,10 +12,22 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${WORKSPACE_LOCATION}/bin")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 17)
 
+# warnings and errors
 if (NOT MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wconversion -Werror")
+    string(JOIN " " CMAKE_CXX_FLAGS
+        "-Wall"
+        "-Wextra"
+        "-Wpedantic"
+        "-Wconversion"
+        "-Werror"
+    )
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /wd4201 /wd4189")
+    string(JOIN " " CMAKE_CXX_FLAGS
+        "/W4"
+        "/WX"
+        "/wd4201"
+        "/wd4189"
+    )
 endif()
 
 # source files and includes
