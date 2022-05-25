@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 project(fractals)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)         # Generate compile_commands.json for ccls
+set(CMAKE_SUPPRESS_REGENERATION ON)           # Remove ZERO_CHECK target
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)  # Group CMake targets inside a folder
+
 set(WORKSPACE_LOCATION "${PROJECT_SOURCE_DIR}/")
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
