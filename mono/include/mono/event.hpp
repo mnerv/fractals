@@ -24,17 +24,22 @@ enum class event_category : std::uint8_t {
     window      = MONO_BIT(2),
     buffer      = MONO_BIT(3),
     keyboard    = MONO_BIT(4),
-    mouse       = MONO_BIT(5)
+    mouse       = MONO_BIT(5),
 };
 
+// TODO: draw_event
 enum class event_type : std::uint32_t {
     none = 0,
-    drop,
+    // application
+    drop, update, draw,
+    // window
     window_resize, window_move, window_focus,
     buffer_resize,
+    // mouse
     mouse_enter,   mouse_leave,
     mouse_move,    mouse_press, mouse_release, mouse_wheel,
-    key_down,      key_up,      key_typed
+    // keyboard
+    key_down,      key_up,      key_typed,
 };
 
 class event {
@@ -81,6 +86,52 @@ class drop_event : public event {
 
   private:
     std::vector<std::string> m_paths;
+};
+
+class update_event : public event {
+  public:
+    update_event(mno::f64 const& time, mno::f64 const& delta)
+        : event(event_type::update, event_category::application),
+          m_time(time), m_delta(delta) {}
+    ~update_event() = default;
+
+    auto name() const -> std::string override { return "update_event"; }
+    auto str() const -> std::string override {
+        std::string str{name() + " { "};
+        str += "time: "  + std::to_string(m_time) + ", ";
+        str += "delta: " + std::to_string(m_delta) + " }";
+        return str;
+    }
+
+    auto time()  const -> mno::f64 { return m_time;  }
+    auto delta() const -> mno::f64 { return m_delta; }
+
+  private:
+    mno::f64 m_time;
+    mno::f64 m_delta;
+};
+
+class draw_event : public event {
+  public:
+    draw_event(mno::f64 const& time, mno::f64 const& delta)
+        : event(event_type::update, event_category::application),
+          m_time(time), m_delta(delta) {}
+    ~draw_event() = default;
+
+    auto name() const -> std::string override { return "draw_event"; }
+    auto str() const -> std::string override {
+        std::string str{name() + " { "};
+        str += "time: "  + std::to_string(m_time)  + ", ";
+        str += "delta: " + std::to_string(m_delta) + " }";
+        return str;
+    }
+
+    auto time()  const -> mno::f64 { return m_time;  }
+    auto delta() const -> mno::f64 { return m_delta; }
+
+  private:
+    mno::f64 m_time;
+    mno::f64 m_delta;
 };
 
 class window_resize_event : public event {

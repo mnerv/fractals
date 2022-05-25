@@ -50,12 +50,17 @@ class window {
     [[nodiscard]] auto buffer_height() const -> std::int32_t { return m_data.buffer_height; }
     [[nodiscard]] auto xpos() const -> std::int32_t { return m_data.xpos; }
     [[nodiscard]] auto ypos() const -> std::int32_t { return m_data.ypos; }
-    auto set_position(std::int32_t const& x, std::int32_t const& y) -> void {
-        glfwSetWindowPos(m_window, x, y);
-    }
+    [[nodiscard]] auto xscale() const -> f32 { return m_data.xscale; }
+    [[nodiscard]] auto yscale() const -> f32 { return m_data.yscale; }
+    auto set_position(std::int32_t const& x, std::int32_t const& y) -> void;
+    auto window_pos(std::int32_t& x, std::int32_t& y)  const -> void;
+    auto window_size(std::int32_t& width, std::int32_t& height) const -> void;
+    auto buffer_size(std::int32_t& width, std::int32_t& height) const -> void;
+    auto content_scale(f32& x, f32& y) const -> void;
+
     auto swap() -> void;
     auto poll() -> void;
-    auto time() const -> double { return glfwGetTime(); }
+    auto time() const -> f64;
 
     auto mouse_pos(f64& x, f64& y) const -> void;
     auto keystate(mno::key const& key) const -> mno::keystate;
@@ -101,6 +106,8 @@ class window {
         std::int32_t buffer_height;
         std::int32_t xpos;
         std::int32_t ypos;
+        mno::f32     xscale;
+        mno::f32     yscale;
 
         std::unordered_map<event_type, event_map> events;
     };

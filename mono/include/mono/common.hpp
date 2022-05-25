@@ -19,6 +19,7 @@ namespace mno {
 using f32 = float;          // float 32-bit
 using f64 = double;         // float 64-bit
 
+using b8  = bool;
 using u8  = std::uint8_t;   // unsigned integer  8-bit
 using u16 = std::uint16_t;  // unsinged integer 16-bit
 using u32 = std::uint32_t;  // unsigned integer 32-bit

@@ -32,7 +32,7 @@ class shader {
     enum class type : std::uint32_t {
         none = 0,
         // primitive types
-        boolean,
+        b8,  // bool
         i8,  u8,
         i16, u16,
         i32, u32, p32,

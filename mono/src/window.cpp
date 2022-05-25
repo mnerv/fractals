@@ -72,10 +72,13 @@ window::window(const window_props &props) {
             fn.second(event);
         });
     });
-    //glfwSetWindowContentScaleCallback(m_window,
-    //[](GLFWwindow* window, float xscale, float yscale){
-    //    auto data = mno::window::user_ptr(window);
-    //});
+    glfwSetWindowContentScaleCallback(m_window,
+    [](GLFWwindow* window, f32 xscale, f32 yscale){
+        auto data = mno::window::user_ptr(window);
+        data->xscale = xscale;
+        data->yscale = yscale;
+        // TODO: Fire content scale event
+    });
     //glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* window, std::int32_t iconified) {
     //    auto data = mno::window::user_ptr(window);
     //});
@@ -231,10 +234,28 @@ window::~window() {
     glfwTerminate();
 }
 
-auto window::swap() -> void { glfwSwapBuffers(m_window); }
-auto window::poll() -> void {
-    glfwPollEvents();
+auto window::set_position(std::int32_t const& x, std::int32_t const& y) -> void {
+    glfwSetWindowPos(m_window, x, y);
 }
+auto window::window_pos(std::int32_t& x, std::int32_t& y)  const -> void {
+    x = m_data.xpos;
+    y = m_data.ypos;
+}
+auto window::window_size(std::int32_t& width, std::int32_t& height) const -> void {
+    width  = m_data.width;
+    height = m_data.height;
+}
+auto window::buffer_size(std::int32_t& width, std::int32_t& height) const -> void {
+    width  = m_data.buffer_width;
+    height = m_data.buffer_height;
+}
+auto window::content_scale(f32& x, f32& y) const -> void {
+    x = m_data.xscale;
+    y = m_data.yscale;
+}
+auto window::swap() -> void { glfwSwapBuffers(m_window); }
+auto window::poll() -> void { glfwPollEvents(); }
+auto window::time() const -> f64 { return glfwGetTime(); }
 
 auto window::mouse_pos(f64 &x, f64 &y) const -> void {
     glfwGetCursorPos(m_window, &x, &y);
