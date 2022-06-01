@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.20.0)
 project(fractals)
 
 # Output location
@@ -46,7 +46,7 @@ target_link_libraries(${PROJECT_NAME}
     glm::glm_static
     mono
 )
-include_directories(${PROJECT_NAME}
+target_include_directories(${PROJECT_NAME} PRIVATE
     "${PROJECT_SOURCE_DIR}/src"
     glfw
     glad
@@ -85,5 +85,3 @@ endif()
 
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${TARGET_SOURCE_FILES})
 
-#message(${PROJECT_SOURCE_DIR})
-#message(${CMAKE_CURRENT_LIST_DIR})

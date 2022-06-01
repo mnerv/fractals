@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <type_traits>
 #include <functional>
+#include <concepts>
 
 #include "common.hpp"
 #include "event.hpp"
@@ -33,6 +34,9 @@ struct window_props {
     std::int32_t xpos{INT32_MIN};
     std::int32_t ypos{INT32_MIN};
 };
+
+template <typename T>
+concept EventFunc = std::is_invocable_r_v<void, T, event const&>;
 
 class window {
   public:
@@ -65,10 +69,10 @@ class window {
     auto mouse_pos(f64& x, f64& y) const -> void;
     auto keystate(mno::key const& key) const -> mno::keystate;
 
-    // TODO: Add type constraints and maybe if possible have it so the lambda can have the inherit parameter type
     template <typename Callable>
+    requires EventFunc<Callable>
     auto add_event_listener(event_type const& type, Callable const& func) -> void {
-        auto const id = (std::size_t)&func;
+        auto const id = std::size_t(&func);
         if (m_data.events.find(type) == m_data.events.end()) {
             std::unordered_map<std::size_t, event_fn> fns{{id, func}};
             m_data.events.insert({type, fns});
@@ -77,8 +81,9 @@ class window {
         }
     }
     template <typename Callable>
+    requires EventFunc<Callable>
     auto remove_event_listener(event_type const& type, [[maybe_unused]]Callable const& func) -> void {
-        auto id  = (std::size_t)&func;
+        auto const id = std::size_t(&func);
         auto fns = m_data.events.find(type);
         if (fns != std::end(m_data.events))
             fns->second.erase(id);

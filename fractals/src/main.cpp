@@ -54,7 +54,7 @@ struct keystate {
 
 auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[]) -> std::int32_t {
     mno::window window{};
-    window.set_position(window.xpos(), 200);
+    //window.set_position(window.xpos(), -800);
 
     nrv::vertex vertices[] {
         {{-1.0f,  1.0f,  0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
@@ -103,17 +103,6 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    //std::vector<mno::ref<nrv::keystate>> keys{};
-    //auto update_keystates = [&] {
-    //    std::for_each(std::begin(keys), std::end(keys), [&](auto& keystate) {
-    //        keystate->update(window.keystate(keystate->key) == mno::keystate::PRESS);
-    //    });
-    //};
-    //auto make_keystate = [&](mno::key const& key) {
-    //    keys.emplace_back(nrv::keystate::make(key));
-    //    return keys.back();
-    //};
-
     auto current_time = window.time();
     auto last_time    = current_time;
     [[maybe_unused]]auto delta_time   = current_time - last_time;
@@ -130,8 +119,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         last_time    = current_time;
         current_time = window.time();
         delta_time   = current_time - last_time;
-
-        is_running = !window.shouldclose();
+        is_running   = !window.shouldclose();
         window.buffer_size(width, height);
 
         // OUTPUT TO SCREEN PASS

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.20.0)
 project(mono)
 
 # Output location
@@ -40,15 +40,13 @@ file(GLOB_RECURSE TARGET_SOURCE_FILES
     "${PROJECT_SOURCE_DIR}/src/*.cpp"
 )
 add_library(${PROJECT_NAME} ${TARGET_SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/include")
-target_link_libraries(${PROJECT_NAME}
-    glfw
-    glad
-    spdlog::spdlog
-    glm::glm_static
+target_include_directories(${PROJECT_NAME} PUBLIC
+    "${PROJECT_SOURCE_DIR}/include"
 )
-include_directories(${PROJECT_NAME}
+target_include_directories(${PROJECT_NAME} PRIVATE
     "${PROJECT_SOURCE_DIR}/include/mono"
+)
+target_link_libraries(${PROJECT_NAME}
     glfw
     glad
     spdlog::spdlog
