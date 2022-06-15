@@ -9,6 +9,7 @@
 #include <algorithm>
 #include "window.hpp"
 
+#include "glad/glad.h"
 #include "spdlog/spdlog.h"
 
 namespace mno {

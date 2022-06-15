@@ -22,7 +22,7 @@
 #include "event.hpp"
 #include "keyboard.hpp"
 
-#include "glad/glad.h"
+#define GLFW_INCLUDE_NONE
 #include "GLFW/glfw3.h"
 #include "glm/vec2.hpp"
 
@@ -69,9 +69,7 @@ class window {
     auto mouse_pos(f64& x, f64& y) const -> void;
     auto keystate(mno::key const& key) const -> mno::keystate;
 
-    template <typename Callable>
-    requires EventFunc<Callable>
-    auto add_event_listener(event_type const& type, Callable const& func) -> void {
+    auto add_event_listener(event_type const& type, EventFunc auto const& func) -> void {
         auto const id = std::size_t(&func);
         if (m_data.events.find(type) == m_data.events.end()) {
             std::unordered_map<std::size_t, event_fn> fns{{id, func}};
@@ -80,9 +78,7 @@ class window {
             m_data.events[type].insert({id, func});
         }
     }
-    template <typename Callable>
-    requires EventFunc<Callable>
-    auto remove_event_listener(event_type const& type, [[maybe_unused]]Callable const& func) -> void {
+    auto remove_event_listener(event_type const& type, EventFunc auto const& func) -> void {
         auto const id = std::size_t(&func);
         auto fns = m_data.events.find(type);
         if (fns != std::end(m_data.events))

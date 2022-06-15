@@ -15,6 +15,7 @@
 
 #include "spdlog/spdlog.h"
 #include "mono/mono.hpp"
+#include "glad/glad.h"
 
 namespace nrv {
 struct vertex {
@@ -31,7 +32,12 @@ auto read_text(std::string const& filename) -> std::string {
         std::istreambuf_iterator<char>(input),
         std::istreambuf_iterator<char>()
     };
-}  // namespace nrv
+}
+
+template <typename T, std::size_t N>
+constexpr auto length_of(T (&)[N]) -> std::size_t {
+    return N;
+}
 
 struct keystate {
     mno::key key;
@@ -54,7 +60,7 @@ struct keystate {
 
 auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[]) -> std::int32_t {
     mno::window window{};
-    //window.set_position(window.xpos(), -800);
+    window.set_position(window.xpos(), -800);
 
     nrv::vertex vertices[] {
         {{-1.0f,  1.0f,  0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
@@ -67,9 +73,13 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         0, 2, 3
     };
 
+    //auto shader = mno::shader::make(
+    //    nrv::read_text("./shaders/410.shader.gl.vert"),
+    //    nrv::read_text("./shaders/410.shader.gl.frag")
+    //);
     auto shader = mno::shader::make(
         nrv::read_text("./shaders/410.shader.gl.vert"),
-        nrv::read_text("./shaders/410.shader.gl.frag")
+        nrv::read_text("./shaders/410.koch3d.gl.frag")
     );
 
     mno::array_buffer array_buffer{};
@@ -78,7 +88,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         {mno::shader::type::vec4, "a_color"},
         {mno::shader::type::vec2, "a_uv"},
     }));
-    array_buffer.set_index_buffer(mno::index_buffer::make(indices, sizeof(indices), sizeof(indices) / sizeof(std::uint32_t)));
+    array_buffer.set_index_buffer(mno::index_buffer::make(indices, sizeof(indices), nrv::length_of(indices)));
 
     auto width  = window.buffer_width();
     auto height = window.buffer_height();
@@ -113,14 +123,31 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         if (e.key() == mno::key::Q)
             is_running = false;
     };
+    auto key_up = [&](mno::event const& event) {
+        auto e = static_cast<mno::key_down_event const&>(event);
+        if (e.key() == mno::key::R) {
+            try {
+                shader = mno::shader::make(
+                    nrv::read_text("./shaders/410.shader.gl.vert"),
+                    nrv::read_text("./shaders/410.koch3d.gl.frag")
+                );
+                spdlog::info("Reload shader");
+            } catch(std::runtime_error const& e) {
+                spdlog::error(e.what());
+            }
+        }
+    };
     window.add_event_listener(mno::event_type::key_down, key_down);
+    window.add_event_listener(mno::event_type::key_up, key_up);
 
+    mno::f64 mouse_posx, mouse_posy;
     while (is_running) {
         last_time    = current_time;
         current_time = window.time();
         delta_time   = current_time - last_time;
         is_running   = !window.shouldclose();
         window.buffer_size(width, height);
+        window.mouse_pos(mouse_posx, mouse_posy);
 
         // OUTPUT TO SCREEN PASS
         glViewport(0, 0, width, height);
@@ -128,6 +155,10 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader->bind();
+        shader->num("u_time", mno::f32(window.time()));
+        shader->vec2("u_resolution", {width, height});
+        shader->vec2("u_mouse", {mouse_posx, mouse_posy});
+
         array_buffer.bind();
         array_buffer.vertex_buffer()->bind();
         array_buffer.index_buffer()->bind();
