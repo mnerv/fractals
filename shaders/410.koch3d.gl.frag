@@ -1,4 +1,7 @@
+// Raymarch template
 // https://www.shadertoy.com/view/WtGXDD
+// How to turn your 2d fractal into 3d!
+// https://youtu.be/__dSLc7-Cpo
 #version 410 core
 layout(location = 0) out vec4 color;
 
@@ -61,16 +64,23 @@ vec2 koch(vec2 uv) {
     return uv;
 }
 
-float get_dist(vec3 point) {
-    float d = sd_box(point, vec3(1));
+float get_dist(vec3 p) {
+    float d = sd_box(p, vec3(1));
 
-    vec2 xy = koch(point.xy);
-    vec2 yz = koch(point.yz);
-    vec2 xz = koch(point.xz);
-
-    //d = xy.y;
+    /*
+    // Straight intersection
+    vec2 xy = koch(p.xy);
+    vec2 yz = koch(p.yz);
+    vec2 xz = koch(p.xz);
     d = max(xy.y, max(yz.y, xz.y));
-    //d = max(d, abs(point.z) - 0.1);
+    */
+
+    vec2 xz = koch(vec2(length(p.xz), p.y));
+    vec2 yz = koch(vec2(length(p.yz), p.x));
+    vec2 xy = koch(vec2(length(p.xy), p.z));
+    d = max(xy.y, max(yz.y, xz.y));
+
+    d = mix(d, length(p) - .5, .5);
 
     return d;
 }
