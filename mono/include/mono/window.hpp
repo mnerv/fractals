@@ -21,6 +21,7 @@
 #include "common.hpp"
 #include "event.hpp"
 #include "keyboard.hpp"
+#include "graphics_context.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include "GLFW/glfw3.h"
@@ -61,6 +62,7 @@ class window {
     auto window_size(std::int32_t& width, std::int32_t& height) const -> void;
     auto buffer_size(std::int32_t& width, std::int32_t& height) const -> void;
     auto content_scale(f32& x, f32& y) const -> void;
+    auto graphics_context() -> ref<mno::graphics_context> { return m_graphicscontext; };
 
     auto swap() -> void;
     auto poll() -> void;
@@ -98,6 +100,7 @@ class window {
 
   private:
     GLFWwindow* m_window{nullptr};
+    ref<mno::graphics_context> m_graphicscontext{nullptr};
 
     struct data {
         std::string  title;

@@ -11,7 +11,7 @@ Fractals explorer.
 Clone repository with `--recursive` flag
 
 ```sh
-git clone --recursive git@github.com:KTheXIII/fractals.git
+git clone --recursive git@github.com:mnerv/fractals.git
 ```
 
 Update the submodules.

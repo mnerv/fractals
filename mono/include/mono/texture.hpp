@@ -15,6 +15,12 @@
 #include "image.hpp"
 
 namespace mno {
+enum class texture_flag : std::uint64_t {
+    mipmap      = MONO_BIT(0),
+    min_nearest = MONO_BIT(1),
+    mag_nearest = MONO_BIT(2),
+};
+
 class texture {
   public:
     explicit texture(mno::image const& image);

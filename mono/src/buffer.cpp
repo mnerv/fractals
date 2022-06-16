@@ -56,6 +56,9 @@ index_buffer::index_buffer(void const* data, std::uint32_t const& size, std::int
     glGenBuffers(1, &m_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+
+    // FIXME: This is hardcoded for just unsigned int, check with the size to determine the correct data type
+    m_type = GL_UNSIGNED_INT;
 }
 index_buffer::~index_buffer() noexcept { glDeleteBuffers(1, &m_buffer); }
 

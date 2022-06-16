@@ -62,6 +62,8 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     mno::window window{};
     window.set_position(window.xpos(), -800);
 
+    auto graphics = window.graphics_context();
+
     nrv::vertex vertices[] {
         {{-1.0f,  1.0f,  0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
         {{ 1.0f,  1.0f,  0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
@@ -73,13 +75,9 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         0, 2, 3
     };
 
-    //auto shader = mno::shader::make(
-    //    nrv::read_text("./shaders/410.shader.gl.vert"),
-    //    nrv::read_text("./shaders/410.shader.gl.frag")
-    //);
     auto shader = mno::shader::make(
         nrv::read_text("./shaders/410.shader.gl.vert"),
-        nrv::read_text("./shaders/410.koch3d.gl.frag")
+        nrv::read_text("./shaders/410.shader.gl.frag")
     );
 
     mno::array_buffer array_buffer{};
@@ -129,7 +127,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
             try {
                 shader = mno::shader::make(
                     nrv::read_text("./shaders/410.shader.gl.vert"),
-                    nrv::read_text("./shaders/410.koch3d.gl.frag")
+                    nrv::read_text("./shaders/410.shader.gl.frag")
                 );
                 spdlog::info("Reload shader");
             } catch(std::runtime_error const& e) {
@@ -159,10 +157,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         shader->vec2("u_resolution", {width, height});
         shader->vec2("u_mouse", {mouse_posx, mouse_posy});
 
-        array_buffer.bind();
-        array_buffer.vertex_buffer()->bind();
-        array_buffer.index_buffer()->bind();
-        glDrawElements(GL_TRIANGLES, array_buffer.index_buffer()->count(), GL_UNSIGNED_INT, nullptr);
+        graphics->draw_triangles(array_buffer);
 
         window.swap();
         window.poll();

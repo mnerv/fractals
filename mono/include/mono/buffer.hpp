@@ -137,6 +137,7 @@ class index_buffer {
     auto unbind() const -> void;
 
     auto count() const -> std::int32_t { return m_count; }
+    auto type() const -> std::uint32_t { return m_type; }
 
   public:
     static auto make(void const* data, std::uint32_t const& size, std::int32_t const& count) -> local<index_buffer>;
@@ -144,6 +145,7 @@ class index_buffer {
   private:
     std::uint32_t m_buffer{};
     std::int32_t  m_count;
+    std::uint32_t  m_type;
 };
 
 class renderbuffer {
