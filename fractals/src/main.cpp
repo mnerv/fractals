@@ -75,10 +75,13 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         0, 2, 3
     };
 
-    auto shader = mno::shader::make(
-        nrv::read_text("./shaders/410.shader.gl.vert"),
-        nrv::read_text("./shaders/410.shader.gl.frag")
-    );
+    auto load_shader = [] {
+        return mno::shader::make(
+            nrv::read_text("./shaders/410.shader.gl.vert"),
+            nrv::read_text("./shaders/410.koch3d.gl.frag")
+        );
+    };
+    auto shader = load_shader();
 
     mno::array_buffer array_buffer{};
     array_buffer.add_vertex_buffer(mno::vertex_buffer::make(vertices, sizeof(vertices), {
@@ -125,10 +128,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         auto e = static_cast<mno::key_down_event const&>(event);
         if (e.key() == mno::key::R) {
             try {
-                shader = mno::shader::make(
-                    nrv::read_text("./shaders/410.shader.gl.vert"),
-                    nrv::read_text("./shaders/410.shader.gl.frag")
-                );
+                shader = load_shader();
                 spdlog::info("Reload shader");
             } catch(std::runtime_error const& e) {
                 spdlog::error(e.what());
