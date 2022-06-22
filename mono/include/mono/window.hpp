@@ -57,7 +57,7 @@ class window {
     [[nodiscard]] auto ypos() const -> std::int32_t { return m_data.ypos; }
     [[nodiscard]] auto xscale() const -> mno::f32 { return m_data.xscale; }
     [[nodiscard]] auto yscale() const -> mno::f32 { return m_data.yscale; }
-    [[nodiscard]] auto graphics_context() -> ref<mno::graphics_context> { return m_graphicscontext; };
+    [[nodiscard]] auto graphics_context() -> ref<mno::graphics_context> { return m_graphics_context; };
 
     auto set_position(std::int32_t const& x, std::int32_t const& y) -> void;
     auto set_window_size(std::int32_t const& width, std::int32_t const& height) -> void;
@@ -103,7 +103,7 @@ class window {
 
   private:
     GLFWwindow*                m_window{nullptr};
-    ref<mno::graphics_context> m_graphicscontext{nullptr};
+    ref<mno::graphics_context> m_graphics_context{nullptr};
 
     struct data {
         std::string  title;
