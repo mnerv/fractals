@@ -60,7 +60,7 @@ struct keystate {
 
 auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[]) -> std::int32_t {
     mno::window window{};
-    window.set_position(window.xpos(), -800);
+    //window.set_position(window.xpos(), -800);
 
     auto graphics = window.graphics_context();
 
@@ -89,7 +89,7 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
         {mno::shader::type::vec4, "a_color"},
         {mno::shader::type::vec2, "a_uv"},
     }));
-    array_buffer.set_index_buffer(mno::index_buffer::make(indices, sizeof(indices), nrv::length_of(indices)));
+    array_buffer.set_index_buffer(mno::index_buffer::make(indices, sizeof(indices), static_cast<std::int32_t>(nrv::length_of(indices))));
 
     auto width  = window.buffer_width();
     auto height = window.buffer_height();

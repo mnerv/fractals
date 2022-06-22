@@ -55,21 +55,24 @@ class window {
     [[nodiscard]] auto buffer_height() const -> std::int32_t { return m_data.buffer_height; }
     [[nodiscard]] auto xpos() const -> std::int32_t { return m_data.xpos; }
     [[nodiscard]] auto ypos() const -> std::int32_t { return m_data.ypos; }
-    [[nodiscard]] auto xscale() const -> f32 { return m_data.xscale; }
-    [[nodiscard]] auto yscale() const -> f32 { return m_data.yscale; }
+    [[nodiscard]] auto xscale() const -> mno::f32 { return m_data.xscale; }
+    [[nodiscard]] auto yscale() const -> mno::f32 { return m_data.yscale; }
+    [[nodiscard]] auto graphics_context() -> ref<mno::graphics_context> { return m_graphicscontext; };
+
     auto set_position(std::int32_t const& x, std::int32_t const& y) -> void;
+    auto set_window_size(std::int32_t const& width, std::int32_t const& height) -> void;
+
     auto window_pos(std::int32_t& x, std::int32_t& y)  const -> void;
     auto window_size(std::int32_t& width, std::int32_t& height) const -> void;
     auto buffer_size(std::int32_t& width, std::int32_t& height) const -> void;
-    auto content_scale(f32& x, f32& y) const -> void;
-    auto graphics_context() -> ref<mno::graphics_context> { return m_graphicscontext; };
+    auto content_scale(mno::f32& x, mno::f32& y) const -> void;
 
     auto swap() -> void;
     auto poll() -> void;
-    auto time() const -> f64;
+    [[nodiscard]] auto time() const -> mno::f64;
 
-    auto mouse_pos(f64& x, f64& y) const -> void;
-    auto keystate(mno::key const& key) const -> mno::keystate;
+    auto mouse_pos(mno::f64& x, mno::f64& y) const -> void;
+    [[nodiscard]] auto keystate(mno::key const& key) const -> mno::keystate;
 
     auto add_event_listener(event_type const& type, EventFunc auto const& func) -> void {
         auto const id = std::size_t(&func);
@@ -99,7 +102,7 @@ class window {
     }
 
   private:
-    GLFWwindow* m_window{nullptr};
+    GLFWwindow*                m_window{nullptr};
     ref<mno::graphics_context> m_graphicscontext{nullptr};
 
     struct data {

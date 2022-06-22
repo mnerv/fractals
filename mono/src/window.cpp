@@ -53,8 +53,55 @@ window::window(const window_props &props) {
 
         auto it = data->events.find(event_type::window_resize);
         if (it == data->events.end()) return;
-        auto fns = it->second;
+        auto const& fns = it->second;
         auto event = window_resize_event(width, height);
+        std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
+            fn.second(event);
+        });
+    });
+    glfwSetWindowPosCallback(m_window,
+    [](GLFWwindow* window, std::int32_t xpos, std::int32_t ypos) {
+        auto data = mno::window::user_ptr(window);
+        data->xpos = xpos;
+        data->ypos = ypos;
+
+        auto it = data->events.find(event_type::window_move);
+        if (it == data->events.end()) return;
+        auto const& fns = it->second;
+        auto event = window_move_event(xpos, ypos);
+        std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
+            fn.second(event);
+        });
+    });
+    glfwSetWindowFocusCallback(m_window, [](GLFWwindow* window, std::int32_t focused){
+        auto data = mno::window::user_ptr(window);
+
+        auto it = data->events.find(event_type::window_focus);
+        if (it == data->events.end()) return;
+        auto const& fns = it->second;
+        auto event = window_focus_event(focused);
+        std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
+            fn.second(event);
+        });
+    });
+    glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* window, std::int32_t iconified) {
+        auto data = mno::window::user_ptr(window);
+
+        auto it = data->events.find(event_type::window_icon);
+        if (it == data->events.end()) return;
+        auto const& fns = it->second;
+        auto event = window_icon_event(iconified);
+        std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
+            fn.second(event);
+        });
+    });
+    glfwSetWindowMaximizeCallback(m_window, [](GLFWwindow* window, std::int32_t maximized) {
+        auto data = mno::window::user_ptr(window);
+
+        auto it = data->events.find(event_type::window_maximize);
+        if (it == data->events.end()) return;
+        auto const& fns = it->second;
+        auto event = window_maximize_event(maximized);
         std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
             fn.second(event);
         });
@@ -67,7 +114,7 @@ window::window(const window_props &props) {
 
         auto it = data->events.find(event_type::buffer_resize);
         if (it == data->events.end()) return;
-        auto fns = it->second;
+        auto const& fns = it->second;
         auto event = buffer_resize_event(width, height);
         std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
             fn.second(event);
@@ -78,29 +125,13 @@ window::window(const window_props &props) {
         auto data = mno::window::user_ptr(window);
         data->xscale = xscale;
         data->yscale = yscale;
-        // TODO: Fire content scale event
-    });
-    //glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* window, std::int32_t iconified) {
-    //    auto data = mno::window::user_ptr(window);
-    //});
-    //glfwSetWindowMaximizeCallback(m_window, [](GLFWwindow* window, std::int32_t maximized) {
-    //    auto data = mno::window::user_ptr(window);
-    //})
-    //glfwSetWindowFocusCallback(m_window, [](GLFWwindow* window, int focused){
-    //    auto data = mno::window::user_ptr(window);
-    //});
-    glfwSetWindowPosCallback(m_window,
-    [](GLFWwindow* window, std::int32_t xpos, std::int32_t ypos) {
-        auto data = mno::window::user_ptr(window);
-        data->xpos = xpos;
-        data->ypos = ypos;
 
-        auto it = data->events.find(event_type::window_move);
+        auto it = data->events.find(event_type::content_scale);
         if (it == data->events.end()) return;
-        auto fns = it->second;
-        auto event = window_move_event(xpos, ypos);
+        auto const& fns = it->second;
+        auto ev = content_scale_event(xscale, yscale);
         std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
-            fn.second(event);
+            fn.second(ev);
         });
     });
     glfwSetCursorPosCallback(m_window,
@@ -109,7 +140,7 @@ window::window(const window_props &props) {
 
         auto it = data->events.find(event_type::mouse_move);
         if (it == data->events.end()) return;
-        auto fns = it->second;
+        auto const& fns = it->second;
         auto event = mouse_move_event(xpos, ypos);
         std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
             fn.second(event);
@@ -123,7 +154,7 @@ window::window(const window_props &props) {
         if (entered) {
             auto it = data->events.find(event_type::mouse_enter);
             if (it == data->events.end()) return;
-            auto fns = it->second;
+            auto const& fns = it->second;
 
             auto event = mouse_enter_event(pos_x, pos_y);
             std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
@@ -149,7 +180,7 @@ window::window(const window_props &props) {
         if (action == GLFW_PRESS) {
             auto it = data->events.find(event_type::mouse_press);
             if (it == data->events.end()) return;
-            auto fns = it->second;
+            auto const& fns = it->second;
 
             auto event = mouse_press_event(button, mods, pos_x, pos_y);
             std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
@@ -158,7 +189,7 @@ window::window(const window_props &props) {
         } else {
             auto it = data->events.find(event_type::mouse_release);
             if (it == data->events.end()) return;
-            auto fns = it->second;
+            auto const& fns = it->second;
 
             auto event = mouse_release_event(button, mods, pos_x, pos_y);
             std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
@@ -171,7 +202,7 @@ window::window(const window_props &props) {
         auto data = mno::window::user_ptr(window);
         auto it = data->events.find(event_type::mouse_wheel);
         if (it == data->events.end()) return;
-        auto fns = it->second;
+        auto const& fns = it->second;
         mno::f64 x, y;
         glfwGetCursorPos(window, &x, &y);
         auto event = mouse_wheel_event(xoffset, yoffset, x, y);
@@ -185,7 +216,7 @@ window::window(const window_props &props) {
         if (action == GLFW_PRESS || action == GLFW_REPEAT) {
             auto it = data->events.find(event_type::key_down);
             if (it == data->events.end()) return;
-            auto fns = it->second;
+            auto const& fns = it->second;
 
             auto event = key_down_event(key, code, mods, action == GLFW_REPEAT);
             std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
@@ -207,7 +238,7 @@ window::window(const window_props &props) {
         auto data = mno::window::user_ptr(window);
         auto it = data->events.find(event_type::key_typed);
         if (it == data->events.end()) return;
-        auto fns = it->second;
+        auto const& fns = it->second;
 
         auto event = key_typed_event(codepoint);
         std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
@@ -221,7 +252,7 @@ window::window(const window_props &props) {
         if (it == data->events.end()) return;
 
         std::vector<std::string> vec_paths{paths, paths + count};
-        auto fns = it->second;
+        auto const& fns = it->second;
         auto event = drop_event(vec_paths);
         std::for_each(std::begin(fns), std::end(fns), [&](auto const& fn) {
             fn.second(event);
@@ -238,6 +269,9 @@ window::~window() {
 auto window::set_position(std::int32_t const& x, std::int32_t const& y) -> void {
     glfwSetWindowPos(m_window, x, y);
 }
+auto window::set_window_size(std::int32_t const& width, std::int32_t const& height) -> void {
+    glfwSetWindowSize(m_window, width, height);
+}
 auto window::window_pos(std::int32_t& x, std::int32_t& y)  const -> void {
     x = m_data.xpos;
     y = m_data.ypos;
@@ -250,15 +284,15 @@ auto window::buffer_size(std::int32_t& width, std::int32_t& height) const -> voi
     width  = m_data.buffer_width;
     height = m_data.buffer_height;
 }
-auto window::content_scale(f32& x, f32& y) const -> void {
+auto window::content_scale(mno::f32& x, mno::f32& y) const -> void {
     x = m_data.xscale;
     y = m_data.yscale;
 }
 auto window::swap() -> void { glfwSwapBuffers(m_window); }
 auto window::poll() -> void { glfwPollEvents(); }
-auto window::time() const -> f64 { return glfwGetTime(); }
+auto window::time() const -> mno::f64 { return glfwGetTime(); }
 
-auto window::mouse_pos(f64 &x, f64 &y) const -> void {
+auto window::mouse_pos(mno::f64 &x, mno::f64 &y) const -> void {
     glfwGetCursorPos(m_window, &x, &y);
 }
 auto window::keystate(mno::key const& key) const -> mno::keystate {

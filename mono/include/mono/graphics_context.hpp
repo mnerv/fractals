@@ -1,5 +1,5 @@
 /**
- * @file   renderer.hpp
+ * @file   graphics_context.hpp
  * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
  * @brief  Renderer abstraction
  * @date   2022-06-02
@@ -23,10 +23,6 @@ enum class render_mode : std::uint32_t {
 
 class graphics_context {
   public:
-    graphics_context() = default;
-    virtual ~graphics_context() = default;
-
-    auto draw(render_mode const& mode, ref<mno::array_buffer> const& buffer) -> void;
     auto draw_triangles(ref<mno::array_buffer> const& buffer) -> void;
     auto draw_triangles(mno::array_buffer const& buffer) -> void;
 };

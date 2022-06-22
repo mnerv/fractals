@@ -33,13 +33,15 @@ enum class event_type : std::uint32_t {
     // application
     drop, update, draw,
     // window
-    window_resize, window_move, window_focus,
-    buffer_resize,
+    window_resize,  window_move, window_focus, window_icon,
+    window_maximize,
+    // buffer
+    buffer_resize, content_scale,
     // mouse
-    mouse_enter,   mouse_leave,
-    mouse_move,    mouse_press, mouse_release, mouse_wheel,
+    mouse_enter, mouse_leave,
+    mouse_move,  mouse_press, mouse_release, mouse_wheel,
     // keyboard
-    key_down,      key_up,      key_typed,
+    key_down, key_up, key_typed,
 };
 
 class event {
@@ -63,7 +65,6 @@ class drop_event : public event {
     drop_event(std::vector<std::string> const& paths)
         : event(event_type::drop, event_category::application),
           m_paths(paths) {};
-    ~drop_event() = default;
 
     auto name() const -> std::string override {
         return "drop_event";
@@ -93,7 +94,6 @@ class update_event : public event {
     update_event(mno::f64 const& time, mno::f64 const& delta)
         : event(event_type::update, event_category::application),
           m_time(time), m_delta(delta) {}
-    ~update_event() = default;
 
     auto name() const -> std::string override { return "update_event"; }
     auto str() const -> std::string override {
@@ -116,7 +116,6 @@ class draw_event : public event {
     draw_event(mno::f64 const& time, mno::f64 const& delta)
         : event(event_type::update, event_category::application),
           m_time(time), m_delta(delta) {}
-    ~draw_event() = default;
 
     auto name() const -> std::string override { return "draw_event"; }
     auto str() const -> std::string override {
@@ -139,7 +138,6 @@ class window_resize_event : public event {
     window_resize_event(std::int32_t const& width, int32_t const& height)
         : event(event_type::window_resize, event_category::window),
           m_width(width), m_height(height) {}
-    ~window_resize_event() = default;
 
     auto name() const -> std::string override {
         return "window_resize_event";
@@ -165,7 +163,6 @@ class window_move_event : public event {
     window_move_event(std::int32_t const& x, std::int32_t const& y)
         : event(event_type::window_move, event_category::window),
           m_x(x), m_y(y) {}
-    ~window_move_event() = default;
 
     auto name() const -> std::string override {
         return "window_move_event";
@@ -191,7 +188,6 @@ class window_focus_event : public event {
     window_focus_event(bool const& is_focus)
         : event(event_type::window_focus, event_category::window),
           m_focus(is_focus) {}
-    ~window_focus_event() = default;
 
     auto name() const -> std::string override {
         return "window_focus_event";
@@ -200,7 +196,7 @@ class window_focus_event : public event {
         using namespace std::string_literals;
         std::string str{name() + " { "};
         str += "focus: ";
-        str += m_focus ? "true" : "false" + " }"s;
+        str += (m_focus ? "true" : "false") + " }"s;
         return str;
     }
 
@@ -210,12 +206,57 @@ class window_focus_event : public event {
     bool m_focus;
 };
 
+class window_icon_event : public event {
+  public:
+    window_icon_event(bool const& is_icon)
+        : event(event_type::window_icon, event_category::window),
+          m_is_icon(is_icon) {}
+
+    auto name() const -> std::string override {
+        return "window_icon_event";
+    }
+    auto str() const -> std::string override {
+        using namespace std::string_literals;
+        std::string str{name() + " { "};
+        str += "iconified: ";
+        str += (m_is_icon ? "true" : "false") + " }"s;
+        return str;
+    }
+
+    auto is_icon() const -> bool { return m_is_icon; }
+
+  private:
+    bool m_is_icon;
+};
+
+class window_maximize_event : public event {
+  public:
+    window_maximize_event(bool const& is_maximize)
+        : event(event_type::window_maximize, event_category::window),
+          m_is_maximize(is_maximize) {}
+
+    auto name() const -> std::string override {
+        return "window_maximize_event";
+    }
+    auto str() const -> std::string override {
+        using namespace std::string_literals;
+        std::string str{name() + " { "};
+        str += "maximize: ";
+        str += (m_is_maximize ? "true" : "false") + " }"s;
+        return str;
+    }
+
+    auto is_maximize() const -> bool { return m_is_maximize; }
+
+  private:
+    bool m_is_maximize;
+};
+
 class buffer_resize_event : public event {
   public:
     buffer_resize_event(std::int32_t const& width, std::int32_t const& height)
         : event(event_type::buffer_resize, event_category::window),
           m_width(width), m_height(height) {}
-    ~buffer_resize_event() = default;
 
     auto name() const -> std::string override {
         return "buffer_resize_event";
@@ -236,11 +277,35 @@ class buffer_resize_event : public event {
     std::int32_t m_height;
 };
 
+class content_scale_event : public event {
+  public:
+    content_scale_event(mno::f32 const& x, mno::f32 const& y)
+        : event(event_type::content_scale, event_category::buffer),
+          m_x(x), m_y(y) {}
+
+    auto name() const -> std::string override {
+        return "content_scale_event";
+    }
+    auto str() const -> std::string override {
+        using namespace std::string_literals;
+        std::string str{name() + " { "};
+        str += "x: " + std::to_string(m_x) + ",";
+        str += "y: " + std::to_string(m_y) + " }";
+        return str;
+    }
+
+    auto xscale() const -> mno::f32 { return m_x; }
+    auto yscale() const -> mno::f32 { return m_y; }
+
+  private:
+    mno::f32 m_x;
+    mno::f32 m_y;
+};
+
 class mouse_event : public event {
   public:
     mouse_event(event_type const& type, mno::f64 const& x, mno::f64 const& y)
         : event(type, event_category::mouse), m_x(x), m_y(y) {}
-    virtual ~mouse_event() = default;
 
     auto name() const -> std::string override {
         return "mouse_event";
@@ -265,7 +330,6 @@ class mouse_move_event : public mouse_event {
   public:
     mouse_move_event(mno::f64 const& x, mno::f64 const& y)
         : mouse_event(event_type::mouse_move, x, y) {}
-    ~mouse_move_event() = default;
 
     auto name() const -> std::string override {
         return "mouse_move_event";
@@ -285,7 +349,6 @@ class mouse_press_event : public mouse_event {
                       mno::f64 const& x, mno::f64 const& y)
         : mouse_event(event_type::mouse_press, x, y),
           m_button(button), m_mods(mods) {}
-    ~mouse_press_event() = default;
 
     auto name() const -> std::string override {
         return "mouse_press_event";
@@ -314,7 +377,6 @@ class mouse_release_event : public mouse_event {
                       mno::f64 const& x, mno::f64 const& y)
         : mouse_event(event_type::mouse_release, x, y),
           m_button(button), m_mods(mods) {}
-    ~mouse_release_event() = default;
 
     auto name() const -> std::string override {
         return "mouse_release_event";
@@ -342,7 +404,6 @@ class mouse_wheel_event : public mouse_event {
     mouse_wheel_event(mno::f64 const& dx, mno::f64 const& dy, mno::f64 const& x, mno::f64 const& y)
         : mouse_event(event_type::mouse_wheel, x, y),
           m_dx(dx), m_dy(dy) {}
-    ~mouse_wheel_event() = default;
 
     auto name() const -> std::string override {
         return "mouse_wheel_event";
@@ -369,7 +430,6 @@ class mouse_enter_event : public mouse_event {
   public:
     mouse_enter_event(mno::f64 const& x, mno::f64 const& y)
         : mouse_event(event_type::mouse_enter, x, y) {}
-    ~mouse_enter_event() = default;
 
     auto name() const -> std::string override {
         return "mouse_enter_event";
@@ -387,7 +447,6 @@ class mouse_leave_event : public mouse_event {
   public:
     mouse_leave_event(mno::f64 const& x, mno::f64 const& y)
         : mouse_event(event_type::mouse_leave, x, y) {}
-    ~mouse_leave_event() = default;
 
     auto name() const -> std::string override {
         return "mouse_leave_event";
@@ -409,7 +468,6 @@ class key_down_event : public event {
                    bool const& is_repeat = false)
         : event(event_type::key_down, event_category::keyboard),
           m_key(key), m_scan(scan), m_mods(mods), m_is_repeat(is_repeat) {}
-    ~key_down_event() = default;
 
     auto name() const -> std::string override {
         return "key_down_event";
@@ -443,7 +501,6 @@ class key_up_event : public event {
                    std::int32_t const& mods)
         : event(event_type::key_up, event_category::keyboard),
           m_key(key), m_scan(scan), m_mods(mods) {}
-    ~key_up_event() = default;
 
     auto name() const -> std::string override {
         return "key_up_event";
@@ -472,7 +529,6 @@ class key_typed_event : public event {
     key_typed_event(std::uint32_t const& code_point)
         : event(event_type::key_typed, event_category::keyboard),
           m_code_point(code_point) {}
-    ~key_typed_event() = default;
 
     auto name() const -> std::string override {
         return "key_typed_event";

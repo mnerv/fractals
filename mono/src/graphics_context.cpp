@@ -1,10 +1,16 @@
+/**
+ * @file   graphics_context.cpp
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  OpenGL graphics implementation
+ * @date   2022-06-02
+ *
+ * @copyright Copyright (c) 2022
+ */
 #include "graphics_context.hpp"
 #include "glad/glad.h"
 
 namespace mno {
 
-auto graphics_context::draw(render_mode const&, ref<mno::array_buffer> const&) -> void {
-}
 auto graphics_context::draw_triangles(ref<mno::array_buffer> const& buffer) -> void {
     draw_triangles(*buffer);
 }
