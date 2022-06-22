@@ -258,8 +258,9 @@ window::window(const window_props &props) {
             fn.second(event);
         });
     });
-
     glfwGetFramebufferSize(m_window, &m_data.buffer_width, &m_data.buffer_height);
+
+    m_graphics_context = make_ref<mno::graphics_context>();
 }
 
 window::~window() {
