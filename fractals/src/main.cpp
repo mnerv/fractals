@@ -17,6 +17,9 @@
 #include "mono/mono.hpp"
 #include "glad/glad.h"
 
+#include "ft2build.h"
+#include FT_FREETYPE_H
+
 namespace nrv {
 struct vertex {
     glm::vec3 position;
@@ -63,6 +66,28 @@ auto main([[maybe_unused]]std::int32_t argc, [[maybe_unused]]char const* argv[])
     //window.set_position(window.xpos(), -800);
 
     auto graphics = window.graphics_context();
+
+    FT_Library font_library;
+    if (FT_Init_FreeType(&font_library)) {
+        spdlog::error("Failed initialising FreeType");
+        return 1;
+    }
+
+    //std::string font_path{"CozetteVector.otf"};
+    //FT_Face font_face;
+    //auto font_error = FT_New_Face(font_library, font_path.c_str(), 0, &font_face);
+    //if (font_error == FT_Err_Unknown_File_Format) {
+    //    spdlog::error("Unknown file format!");
+    //    return 1;
+    //} else if (font_error) {
+    //    spdlog::error("Failed Loading font!");
+    //    return 1;
+    //}
+
+    //spdlog::info("face count: {}", font_face->num_glyphs);
+    //// Clean up FreeType resources
+    //FT_Done_Face(font_face);
+    //FT_Done_FreeType(font_library);
 
     nrv::vertex vertices[] {
         {{-1.0f,  1.0f,  0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},

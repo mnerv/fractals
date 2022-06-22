@@ -51,6 +51,7 @@ target_link_libraries(${PROJECT_NAME}
     glad
     spdlog::spdlog
     glm::glm_static
+    freetype
 )
 
 if (NOT WIN32)

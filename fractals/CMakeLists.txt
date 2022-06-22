@@ -52,6 +52,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     glad
     spdlog::spdlog
     glm::glm_static
+    freetype
     mono
 )
 
