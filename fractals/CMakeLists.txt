@@ -75,12 +75,10 @@ elseif(WIN32)
     )
 endif()
 
-if (FRACTALS_RUN_TARGET)
-    add_custom_target(run
-        COMMAND "${WORKSPACE_LOCATION}/bin/${PROJECT_NAME}"
-        DEPENDS ${PROJECT_NAME}
-        "${WORKSPACE_LOCATION}/bin/${PROJECT_NAME}"
-    )
+# Set working directory when debugging insied IDE
+if (MSVC)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${WORKSPACE_LOCATION}")
 endif()
 
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${TARGET_SOURCE_FILES})
