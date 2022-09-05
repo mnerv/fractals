@@ -1,38 +1,6 @@
 cmake_minimum_required(VERSION 3.20.0)
 project(mono)
 
-# Output location
-if (NOT WORKSPACE_LOCATION)
-    set(WORKSPACE_LOCATION ".")
-endif()
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${WORKSPACE_LOCATION}/bin/${PROJECT_NAME}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${WORKSPACE_LOCATION}/bin/${PROJECT_NAME}")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${WORKSPACE_LOCATION}/bin/${PROJECT_NAME}")
-
-# Compilation flags
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_C_STANDARD 17)
-
-# Warnings and Errors
-if (NOT MSVC)
-    string(JOIN " " CMAKE_CXX_FLAGS
-        ${CMAKE_CXX_FLAGS}
-        "-Wall"
-        "-Wextra"
-        "-Wpedantic"
-        "-Wconversion"
-        "-Werror"
-    )
-else()
-    string(JOIN " " CMAKE_CXX_FLAGS
-        ${CMAKE_CXX_FLAGS}
-        "/W4"
-        "/WX"
-        "/wd4201"
-        "/wd4189"
-    )
-endif()
-
 # source files and includes
 file(GLOB_RECURSE TARGET_SOURCE_FILES
     "${PROJECT_SOURCE_DIR}/include/*.hpp"
@@ -53,10 +21,25 @@ target_link_libraries(${PROJECT_NAME}
     glm::glm_static
     freetype
 )
-
-if (NOT WIN32)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+if (NOT MSVC AND NOT WIN32)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        "-Wall"
+        "-Wextra"
+        "-Wconversion"
+        "-Wpedantic"
+        "-Wshadow"
+        "-Werror"
+    )
     target_link_libraries(${PROJECT_NAME}
         "-lpthread"
+    )
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        "/W4"
+        "/WX"
+        "/wd4201"
+        "/wd4189"
     )
 endif()
 
@@ -81,3 +64,4 @@ elseif(WIN32)
 endif()
 
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${TARGET_SOURCE_FILES})
+
