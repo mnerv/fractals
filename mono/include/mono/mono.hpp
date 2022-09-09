@@ -1,6 +1,6 @@
 /**
  * @file   mono.hpp
- * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @author Pratchaya Khansomboon (me@mononerv.dev)
  * @brief  mono library header includes.
  * @date   2022-05-03
  *

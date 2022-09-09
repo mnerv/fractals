@@ -1,6 +1,6 @@
 /**
  * @file   buffer.cpp
- * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @author Pratchaya Khansomboon (me@mononerv.dev)
  * @brief  Buffer implemenation for OpenGL.
  * @date   2022-05-03
  *

@@ -1,6 +1,6 @@
 /**
  * @file   keyboard.hpp
- * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @author Pratchaya Khansomboon (me@mononerv.dev)
  * @brief  Keyboard input mappings as C++ enum class and operator overloads for it.
  * @date   2022-05-15
  *

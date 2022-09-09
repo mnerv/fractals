@@ -1,6 +1,6 @@
 /**
  * @file   image.cpp
- * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @author Pratchaya Khansomboon (me@mononerv.dev)
  * @brief  Basic image implementation.
  * @date   2022-05-03
  *

@@ -1,6 +1,6 @@
 /**
  * @file   graphics_context.hpp
- * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @author Pratchaya Khansomboon (me@mononerv.dev)
  * @brief  Renderer abstraction
  * @date   2022-06-02
  *

@@ -1,6 +1,6 @@
 /**
  * @file   buffer.hpp
- * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @author Pratchaya Khansomboon (me@mononerv.dev)
  * @brief  Buffer abstraction layer for OpenGL.
  *         Vertex, Index and Array buffer interface.
  * @date   2022-05-03

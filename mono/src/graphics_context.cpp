@@ -1,6 +1,6 @@
 /**
  * @file   graphics_context.cpp
- * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @author Pratchaya Khansomboon (me@mononerv.dev)
  * @brief  OpenGL graphics implementation
  * @date   2022-06-02
  *

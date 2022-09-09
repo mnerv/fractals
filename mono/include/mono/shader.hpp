@@ -1,6 +1,6 @@
 /**
  * @file   shader.hpp
- * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @author Pratchaya Khansomboon (me@mononerv.dev)
  * @brief  Shader implemenation for OpenGL.
  * @date   2022-05-03
  *

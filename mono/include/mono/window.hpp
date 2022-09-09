@@ -1,6 +1,6 @@
 /**
  * @file   window.hpp
- * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @author Pratchaya Khansomboon (me@mononerv.dev)
  * @brief  Window abstraction layer for GLFW.
  * @date   2022-05-03
  *
