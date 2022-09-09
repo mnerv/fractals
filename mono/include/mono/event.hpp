@@ -19,12 +19,12 @@
 
 namespace mno {
 enum class event_category : std::uint8_t {
-    none        = MONO_BIT(0),
-    application = MONO_BIT(1),
-    window      = MONO_BIT(2),
-    buffer      = MONO_BIT(3),
-    keyboard    = MONO_BIT(4),
-    mouse       = MONO_BIT(5),
+    none        = set_bit(0),
+    application = set_bit(1),
+    window      = set_bit(2),
+    buffer      = set_bit(3),
+    keyboard    = set_bit(4),
+    mouse       = set_bit(5),
 };
 
 // TODO: draw_event

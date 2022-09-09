@@ -14,7 +14,10 @@
 
 namespace mno {
 
-#define MONO_BIT(x) 1 << x
+inline constexpr auto set_bit(auto const& position) {
+    return 1 << position;
+}
+
 
 using f32 = float;          // float 32-bit
 using f64 = double;         // float 64-bit
