@@ -17,8 +17,8 @@
 namespace mno {
 
 enum class render_mode : std::uint32_t {
-    triangles = MONO_BIT(0),
-    lines     = MONO_BIT(1),
+    triangles = set_bit(0),
+    lines     = set_bit(1),
 };
 
 class graphics_context {

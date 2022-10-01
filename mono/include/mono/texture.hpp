@@ -16,9 +16,9 @@
 
 namespace mno {
 enum class texture_flag : std::uint64_t {
-    mipmap      = MONO_BIT(0),
-    min_nearest = MONO_BIT(1),
-    mag_nearest = MONO_BIT(2),
+    mipmap      = set_bit(0),
+    min_nearest = set_bit(1),
+    mag_nearest = set_bit(2),
 };
 
 class texture {
