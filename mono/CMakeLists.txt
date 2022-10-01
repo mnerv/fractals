@@ -7,7 +7,7 @@ file(GLOB_RECURSE TARGET_SOURCE_FILES
     "${PROJECT_SOURCE_DIR}/src/*.hpp"
     "${PROJECT_SOURCE_DIR}/src/*.cpp"
 )
-add_library(${PROJECT_NAME} ${TARGET_SOURCE_FILES})
+add_library(${PROJECT_NAME} STATIC ${TARGET_SOURCE_FILES})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
     "${PROJECT_SOURCE_DIR}/include"
